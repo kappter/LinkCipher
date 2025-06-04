@@ -31,19 +31,35 @@ function generateCode(responses) {
   const valueSum = valueKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
   const now = new Date();
   const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-  const hash = btoa(`${traumaSum}-${valueSum}-${timestamp}`).slice(0, 8).toUpperCase();
+  const rawHash = btoa(`${traumaSum}-${valueSum}-${timestamp}`);
+  const hash = rawHash.replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase();
   return `${hash.slice(0, 4)}-${hash.slice(4)}`;
 }
 
+function isValidCode(code) {
+  return /^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code);
+}
+
 function compareCodes(code1, code2) {
-  const [t1, v1] = code1.split('-').map(part => atob(part + '====').split('-').map(Number));
-  const [t2, v2] = code2.split('-').map(part => atob(part + '====').split('-').map(Number));
-  const traumaDiff = Math.abs(t1[0] - t2[0]);
-  const valueDiff = Math.abs(v1[0] - v2[0]);
-  const links = traumaDiff < 10 && valueDiff < 10 ? 'You share similar values and experiences.' : 'You have some alignment but may differ in key areas.';
-  const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
-  const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
-  return { links, disconnects, caveats, traumaDiff, valueDiff };
+  if (!isValidCode(code1) || !isValidCode(code2)) {
+    throw new Error('Invalid code format');
+  }
+  try {
+    const decodeSegment = (segment) => {
+      const padded = segment + '='.repeat((4 - (segment.length % 4)) % 4);
+      return atob(padded).split('-').map(Number);
+    };
+    const [t1, v1] = code1.split('-').map(decodeSegment);
+    const [t2, v2] = code2.split('-').map(decodeSegment);
+    const traumaDiff = Math.abs(t1[0] - t2[0]);
+    const valueDiff = Math.abs(v1[0] - v2[0]);
+    const links = traumaDiff < 10 && valueDiff < 10 ? 'You share similar values and experiences.' : 'You have some alignment but may differ in key areas.';
+    const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
+    const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
+    return { links, disconnects, caveats, traumaDiff, valueDiff };
+  } catch (e) {
+    throw new Error('Invalid code format');
+  }
 }
 
 function renderBarChart(data) {
@@ -157,18 +173,28 @@ document.getElementById('random-code').addEventListener('click', () => {
 document.getElementById('compare-codes').addEventListener('click', () => {
   const code1 = document.getElementById('code1').value;
   const code2 = document.getElementById('code2').value;
+  const errorDiv = document.getElementById('code-error');
+  errorDiv.classList.add('hidden');
   if (code1 && code2) {
-    const result = compareCodes(code1, code2);
-    showScreen('results-screen');
-    document.getElementById('summary-text').innerHTML = `
-      <p><strong>Links:</strong> ${result.links}</p>
-      <p><strong>Disconnects:</strong> ${result.disconnects}</p>
-      <p><strong>Caveats:</strong> ${result.caveats}</p>
-    `;
-    renderBarChart(result);
-    document.getElementById('bar-view').onclick = () => renderBarChart(result);
-    document.getElementById('venn-view').onclick = () => renderVennDiagram(result);
-    document.getElementById('lines-view').onclick = () => renderLinesView(result);
+    try {
+      const result = compareCodes(code1, code2);
+      showScreen('results-screen');
+      document.getElementById('summary-text').innerHTML = `
+        <p><strong>Links:</strong> ${result.links}</p>
+        <p><strong>Disconnects:</strong> ${result.disconnects}</p>
+        <p><strong>Caveats:</strong> ${result.caveats}</p>
+      `;
+      renderBarChart(result);
+      document.getElementById('bar-view').onclick = () => renderBarChart(result);
+      document.getElementById('venn-view').onclick = () => renderVennDiagram(result);
+      document.getElementById('lines-view').onclick = () => renderLinesView(result);
+    } catch (e) {
+      errorDiv.classList.remove('hidden');
+      errorDiv.textContent = 'Invalid code format. Please enter codes like XXXX-YYYY.';
+    }
+  } else {
+    errorDiv.classList.remove('hidden');
+    errorDiv.textContent = 'Please enter both codes.';
   }
 });
 
@@ -192,7 +218,6 @@ document.getElementById('dark-mode-toggle').addEventListener('click', (e) => {
   toggleDarkMode();
 });
 
-// Initialize dark mode from localStorage
 if (localStorage.getItem('darkMode') === 'true') {
   document.body.classList.add('dark-mode');
   document.getElementById('dark-mode-toggle').textContent = 'Toggle Light Mode';
