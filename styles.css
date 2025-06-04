@@ -1,0 +1,29 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+header, footer {
+  background-color: #2E6DB4; /* Mariner Blue default */
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+#question-container {
+  margin-bottom: 1rem;
+}
+
+.spectrum-radio {
+  margin: 0.5rem;
+}
+
+#visualization {
+  height: 300px;
+}
+
+/* Ensure footer stays fixed */
+main {
+  padding-bottom: 80px; /* Space for fixed footer */
+}
