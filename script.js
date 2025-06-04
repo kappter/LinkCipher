@@ -35,11 +35,11 @@ function generateCode(responses) {
   const traumaSum = traumaKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
   const valueSum = valueKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
   const now = new Date();
-  const timestamp = `${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`; // Use MMSS for brevity
-  const traumaHex = traumaSum.toString(16).padStart(2, '0').toUpperCase(); // e.g., 15 -> "0F"
-  const valueHex = valueSum.toString(16).padStart(2, '0').toUpperCase(); // e.g., 20 -> "14"
-  const code = `${traumaHex}${valueHex}${timestamp}`; // e.g., "0F143252" for traumaSum=15, valueSum=20, MMSS=3252
-  return `${code.slice(0, 4)}-${code.slice(4)}`; // e.g., "0F14-3252"
+  const timestamp = `${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+  const traumaHex = traumaSum.toString(16).padStart(2, '0').toUpperCase();
+  const valueHex = valueSum.toString(16).padStart(2, '0').toUpperCase();
+  const code = `${traumaHex}${valueHex}${timestamp}`;
+  return `${code.slice(0, 4)}-${code.slice(4)}`; // e.g., "0F143252" → "0F14-3252"
 }
 
 function isValidCode(code) {
@@ -53,8 +53,14 @@ function compareCodes(code1, code2) {
   try {
     const decodeSegment = (code) => {
       const hexPart = code.split('-')[0]; // First 4 chars: traumaHex + valueHex
-      const traumaSum = parseInt(hexPart.slice(0, 2), 16); // First 2 chars as hex
-      const valueSum = parseInt(hexPart.slice(2, 4), 16); // Next 2 chars as hex
+      const traumaHex = hexPart.slice(0, 2); // First 2 chars
+      const valueHex = hexPart.slice(2, 4); // Next 2 chars
+      const traumaSum = parseInt(traumaHex, 16);
+      const valueSum = parseInt(valueHex, 16);
+      if (isNaN(traumaSum) || isNaN(valueSum)) {
+        console.error('Decoding failed for code:', code, 'hexPart:', hexPart, 'traumaHex:', traumaHex, 'valueHex:', valueHex);
+        throw new Error('Invalid hex values');
+      }
       return { traumaSum, valueSum };
     };
     const { traumaSum: t1, valueSum: v1 } = decodeSegment(code1);
@@ -64,7 +70,7 @@ function compareCodes(code1, code2) {
     const links = traumaDiff < 10 && valueDiff < 10 ? 'You share similar values and experiences.' : 'You have some alignment but may differ in key areas.';
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
-    console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
+    console.log('Decoded values:', { code1, code2, t1, v1, t2, v2, traumaDiff, valueDiff });
     return { links, disconnects, caveats, traumaDiff, valueDiff };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
@@ -106,7 +112,7 @@ function renderBarChart(data) {
         sketch.rect(50, 200 - data.traumaDiff * 5, 80, data.traumaDiff * 5);
         sketch.rect(150, 200 - data.valueDiff * 5, 80, data.valueDiff * 5);
       } else {
-        console.error('Invalid data for Bar Chart:', data);
+        console.error('Invalid data for Bar Chart:', JSON.stringify(data));
       }
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Trauma', 50, 220);
@@ -180,7 +186,7 @@ function renderLinesView(data) {
         sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
         sketch.line(350, 300 - data.valueDiff * 10, 350, 300);
       } else {
-        console.error('Invalid data for Vertical Lines:', data);
+        console.error('Invalid data for Vertical Lines:', JSON.stringify(data));
       }
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('You', 40, 320);
