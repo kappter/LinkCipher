@@ -29,11 +29,15 @@ function generateCode(responses) {
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
   const traumaSum = traumaKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
   const valueSum = valueKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
-  const hash = btoa(`${traumaSum}-${valueSum}-${Date.now()}`).slice(0, 8).toUpperCase();
+  // Format timestamp as YYYYMMDDHHMM
+  const now = new Date();
+  const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+  const hash = btoa(`${traumaSum}-${valueSum}-${timestamp}`).slice(0, 8).toUpperCase();
   return `${hash.slice(0, 4)}-${hash.slice(4)}`;
 }
 
 function compareCodes(code1, code2) {
+  // Decode only trauma and value sums, ignore timestamp
   const [t1, v1] = code1.split('-').map(part => atob(part + '====').split('-').map(Number));
   const [t2, v2] = code2.split('-').map(part => atob(part + '====').split('-').map(Number));
   const traumaDiff = Math.abs(t1[0] - t2[0]);
@@ -130,7 +134,7 @@ document.getElementById('skip-question').addEventListener('click', () => {
   responses[questions[currentQuestionIndex].id] = 3;
   currentQuestionIndex++;
   if (currentQuestionIndex < questions.length) {
-    renderQuestion();
+      renderQuestion();
   } else {
     userCode = generateCode(responses);
     showScreen('code-entry-screen');
