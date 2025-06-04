@@ -36,9 +36,10 @@ function generateCode(responses) {
   const valueSum = valueKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
   const now = new Date();
   const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-  const rawHash = btoa(`${traumaSum}-${valueSum}-${timestamp}`);
-  const hash = rawHash.replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase();
-  return `${hash.slice(0, 4)}-${hash.slice(4)}`;
+  const rawData = `${traumaSum}-${valueSum}-${timestamp}`;
+  const encoded = btoa(rawData); // Full base64 encoding without truncation
+  const hash = encoded.replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase(); // Keep 8 chars for brevity
+  return `${hash.slice(0, 4)}-${hash.slice(4)}`; // Maintain XXXX-YYYY format
 }
 
 function isValidCode(code) {
@@ -52,18 +53,21 @@ function compareCodes(code1, code2) {
   try {
     const decodeSegment = (segment) => {
       const padded = segment + '='.repeat((4 - (segment.length % 4)) % 4);
-      return atob(padded).split('-').map(Number);
+      const fullEncoded = atob(padded); // Decode the full segment
+      const [traumaSum1, valueSum1, timestamp1] = fullEncoded.split('-').map(Number); // Split and convert
+      return { traumaSum: traumaSum1, valueSum: valueSum1 };
     };
-    const [t1, v1] = code1.split('-').map(decodeSegment);
-    const [t2, v2] = code2.split('-').map(decodeSegment);
-    const traumaDiff = Math.abs(t1[0] - t2[0]);
-    const valueDiff = Math.abs(v1[0] - v2[0]);
+    const [seg1, seg2] = [code1.split('-')[0], code2.split('-')[0]]; // Use first 4 chars for simplicity
+    const { traumaSum: t1, valueSum: v1 } = decodeSegment(seg1);
+    const { traumaSum: t2, valueSum: v2 } = decodeSegment(seg2);
+    const traumaDiff = Math.abs(t1 - t2);
+    const valueDiff = Math.abs(v1 - v2);
     const links = traumaDiff < 10 && valueDiff < 10 ? 'You share similar values and experiences.' : 'You have some alignment but may differ in key areas.';
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
     return { links, disconnects, caveats, traumaDiff, valueDiff };
   } catch (e) {
-    throw new Error('Invalid code format');
+    throw new Error('Invalid code format or decoding failed');
   }
 }
 
@@ -133,10 +137,10 @@ function renderVennDiagram(data) {
       const rgb = hexToRGB(themeColor);
       sketch.noFill();
       sketch.stroke(...rgb);
-      sketch.ellipse(150, 150, 100, 100); // Fixed syntax: added missing arguments
+      sketch.ellipse(150, 150, 100, 100);
       sketch.ellipse(250, 150, 100, 100);
       sketch.fill(150);
-      sketch.ellipse(200, 150, 100, 100); // Overlap circle
+      sketch.ellipse(200, 150, 100, 100);
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Overlap', 180, 150);
       console.log('Venn Diagram rendered with data:', data.valueDiff);
@@ -169,7 +173,7 @@ function renderLinesView(data) {
       const rgb = hexToRGB(themeColor);
       sketch.stroke(...rgb);
       sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
-      sketch.line(350, 300 - data.valueDiff * 10, 350, 300); // Fixed typo: valueDiff
+      sketch.line(350, 300 - data.valueDiff * 10, 350, 300);
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('You', 40, 320);
       sketch.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
@@ -239,7 +243,7 @@ function generateReport(code1, code2, result) {
   a.href = url;
   a.download = `LinkCipher_TalkingPoints_${formattedDateTime.replace(/[, :]/g, '_')}.html`;
   a.click();
-  URL.revokeObjectURL(url); // Fixed typo: rereplaceObjectURL to revokeObjectURL
+  URL.revokeObjectURL(url);
 }
 
 function toggleDarkMode() {
@@ -322,7 +326,7 @@ document.getElementById('compare-codes').addEventListener('click', () => {
       document.getElementById('print-report').addEventListener('click', () => generateReport(code1, code2, result));
     } catch (e) {
       errorDiv.classList.remove('hidden');
-      errorDiv.textContent = 'Invalid code format. Please enter codes like XXXX-YYYY.';
+      errorDiv.textContent = e.message;
     }
   } else {
     errorDiv.classList.remove('hidden');
