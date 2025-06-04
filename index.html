@@ -47,18 +47,21 @@
   <meta http-equiv="Expires" content="0">
   <title>LinkCipher</title>
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmEDAAABGUlEQVRYCe2TsUoDQRSGv7iBS0tLgyAIghAEXkFwcCsu3oW9jV/A1oI7sLCwsxPsLCwsLGyEWCiCIIi3qV3SzCQTzO3Ymd3Z5Q8kM5nM5/eb/znkE8eA1gE8sQzYAA4A2wA2gB3AWWiZ2QJ2AOfADmAfsAvYBOwCdgE7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBc4A8As4P4L5C8BPXb5BAAAAAElFTkSuQmCC">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css?ver=1.0.4" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?ver=1.0.4">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css?ver=1.0.5" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?ver=1.0.5">
   <style>
-    .logo-title { height: 50px; width: auto; vertical-align: middle; margin-right: 10px; }
-    .logo-footer { height: 12px; width: auto; vertical-align: middle; margin-right: 2px; }
+    .header-container { position: relative; display: inline-block; }
+    .logo-title { height: 50px; width: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.3; }
+    .header-title { position: relative; z-index: 1; }
     .footer-text { font-size: 0.7em; line-height: 1; padding: 2px 0; }
   </style>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
   <header class="bg-blue-600 text-white text-center py-4">
-    <img src="logo.png" alt="LinkCipher Logo" class="logo-title">
-    <span class="text-3xl font-bold align-middle">LinkCipher</span>
+    <div class="header-container">
+      <img src="logo.png" alt="LinkCipher Logo" class="logo-title">
+      <span class="text-3xl font-bold header-title">LinkCipher</span>
+    </div>
     <p class="text-lg mt-1">Discover the core that shapes our lives</p>
   </header>
 
@@ -131,11 +134,11 @@
   </main>
 
   <footer class="bg-blue-600 text-white text-center py-2 fixed bottom-0 w-full">
-    <p class="footer-text">© 2025 LinkCipher. All rights reserved. | <a href="#" id="dark-mode-toggle" class="underline">Toggle Dark Mode</a> | <img src="logo.png" alt="LinkCipher Logo" class="logo-footer"> <a href="https://github.com/your-username/linkcipher" target="_blank" class="underline">More App Info</a></p>
+    <p class="footer-text">© 2025 LinkCipher. All rights reserved. | <a href="#" id="dark-mode-toggle" class="underline">Toggle Dark Mode</a> | <a href="https://github.com/your-username/linkcipher" target="_blank" class="underline">More App Info</a></p>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/p5@1.4.2/lib/p5.js?ver=1.0.4"></script>
-  <script src="data.js?ver=1.0.4"></script>
-  <script src="script.js?ver=1.0.4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.4.2/lib/p5.js?ver=1.0.5"></script>
+  <script src="data.js?ver=1.0.5"></script>
+  <script src="script.js?ver=1.0.5"></script>
 </body>
 </html>
