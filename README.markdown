@@ -17,7 +17,7 @@ LinkCipher is a web-based app that helps users discover compatibility in relatio
 - **Privacy-First**: All processing is client-side; no data is stored or transmitted.
 - **Random Code Option**: Test the app by generating a random code for comparison without needing a second user.
 - **GitHub Link**: Access more app information via the “More App Info” link in the footer.
-- **Custom Logo**: Features a custom logo (`logo.png`) in the title bar and a small version in the footer.
+- **Custom Logo**: Features the title “LinkCipher” and `logo.png` (scaled to 50px height) in the header, with a small version in the footer.
 
 ## Benefits
 
@@ -39,7 +39,7 @@ LinkCipher is a web-based app that helps users discover compatibility in relatio
    - `styles.css`: Custom styles for a sleek, responsive interface.
    - `data.js`: Question sets and relationship weights.
    - `script.js`: Logic for survey, code generation, visualizations, and report generation.
-   - `logo.png`: Custom logo file for the title bar and footer.
+   - `logo.png`: Custom logo file for the header and footer.
 
 3. **Dependencies**:
    - Uses [Tailwind CSS](https://cdn.tailwindcss.com) for styling (loaded via CDN).
@@ -66,8 +66,7 @@ LinkCipher is a web-based app that helps users discover compatibility in relatio
   - Chrome: Press `Ctrl+Shift+Delete`, select “Cached images and files,” and clear.
   - Firefox: Go to `about:preferences#privacy`, clear cache under “Cookies and Site Data.”
   - Use incognito mode to bypass cache.
-  - If hosted (e.g., GitHub Pages), verify the latest `index.html` is pushed and cache is invalidated.
-- **Logo Issues**: If `logo.png` doesn’t display, ensure it’s in the root directory and a valid PNG file. Adjust the `.logo-title` (100px max-width) or `.logo-footer` (16px max-width) CSS in `<style>` if the size is off.
+- **Logo Issues**: If `logo.png` doesn’t display, ensure it’s in the root directory and a valid PNG file. Adjust the `.logo-title` (50px height) or `.logo-footer` (12px height) CSS in `<style>` if the size is off.
 - **Visualization Errors**: If visualizations (e.g., Venn diagram) fail, ensure `themeColor` is a valid hex code (e.g., `#2E6DB4`) and p5.js is loaded via CDN.
 - **Report Issues**: If the “Print Talking Points” report doesn’t generate, ensure JavaScript is enabled and `script.js` includes the `generateReport` function.
 
