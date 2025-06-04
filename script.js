@@ -29,7 +29,6 @@ function generateCode(responses) {
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
   const traumaSum = traumaKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
   const valueSum = valueKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
-  // Format timestamp as YYYYMMDDHHMM
   const now = new Date();
   const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
   const hash = btoa(`${traumaSum}-${valueSum}-${timestamp}`).slice(0, 8).toUpperCase();
@@ -37,7 +36,6 @@ function generateCode(responses) {
 }
 
 function compareCodes(code1, code2) {
-  // Decode only trauma and value sums, ignore timestamp
   const [t1, v1] = code1.split('-').map(part => atob(part + '====').split('-').map(Number));
   const [t2, v2] = code2.split('-').map(part => atob(part + '====').split('-').map(Number));
   const traumaDiff = Math.abs(t1[0] - t2[0]);
@@ -54,11 +52,11 @@ function renderBarChart(data) {
   new p5(sketch => {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
-      sketch.background(255);
+      sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
       sketch.fill(themeColor);
       sketch.rect(50, 200 - data.traumaDiff * 5, 80, data.traumaDiff * 5);
       sketch.rect(150, 200 - data.valueDiff * 5, 80, data.valueDiff * 5);
-      sketch.fill(0);
+      sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Trauma', 50, 220);
       sketch.text('Values', 150, 220);
     };
@@ -71,14 +69,14 @@ function renderVennDiagram(data) {
   new p5(sketch => {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
-      sketch.background(255);
+      sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
       sketch.noFill();
       sketch.stroke(themeColor);
       sketch.ellipse(150, 150, 100);
       sketch.ellipse(250, 150, 100);
       sketch.fill(themeColor, 100);
       sketch.ellipse(200, 150, 80 - data.traumaDiff);
-      sketch.fill(0);
+      sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Overlap', 180, 150);
     };
   });
@@ -90,15 +88,23 @@ function renderLinesView(data) {
   new p5(sketch => {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
-      sketch.background(255);
+      sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
       sketch.stroke(themeColor);
       sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
       sketch.line(350, 300 - data.valueDiff * 10, 350, 300);
-      sketch.fill(0);
+      sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('You', 40, 320);
       sketch.text('Other', 340, 320);
     };
   });
+}
+
+function toggleDarkMode() {
+  const body = document.body;
+  body.classList.toggle('dark-mode');
+  const isDarkMode = body.classList.contains('dark-mode');
+  document.getElementById('dark-mode-toggle').textContent = isDarkMode ? 'Toggle Light Mode' : 'Toggle Dark Mode';
+  localStorage.setItem('darkMode', isDarkMode);
 }
 
 document.getElementById('start-survey').addEventListener('click', () => {
@@ -134,7 +140,7 @@ document.getElementById('skip-question').addEventListener('click', () => {
   responses[questions[currentQuestionIndex].id] = 3;
   currentQuestionIndex++;
   if (currentQuestionIndex < questions.length) {
-      renderQuestion();
+    renderQuestion();
   } else {
     userCode = generateCode(responses);
     showScreen('code-entry-screen');
@@ -180,3 +186,14 @@ document.getElementById('theme-color').addEventListener('change', (e) => {
     btn.classList.add('bg-custom');
   });
 });
+
+document.getElementById('dark-mode-toggle').addEventListener('click', (e) => {
+  e.preventDefault();
+  toggleDarkMode();
+});
+
+// Initialize dark mode from localStorage
+if (localStorage.getItem('darkMode') === 'true') {
+  document.body.classList.add('dark-mode');
+  document.getElementById('dark-mode-toggle').textContent = 'Toggle Light Mode';
+}

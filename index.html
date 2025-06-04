@@ -81,9 +81,9 @@
           <option value="mentor">Mentor</option>
         </select>
       </div>
-      <div id="color-picker" class="mb-4">
-        <label for="theme-color" class="block mb-2">Choose Theme Color:</label>
-        <input type="color" id="theme-color" value="#2E6DB4" class="border p-2 rounded">
+      <div id="color-picker" class="mb-4 flex items-center">
+        <label for="theme-color" class="mr-2">Choose Theme Color:</label>
+        <input type="color" id="theme-color" value="#2E6DB4" class="color-picker">
       </div>
       <div id="question-container"></div>
       <button id="next-question" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4">Next</button>
@@ -119,7 +119,7 @@
   </main>
 
   <footer class="bg-blue-600 text-white text-center py-4 fixed bottom-0 w-full">
-    <p>&copy; 2025 LinkCipher. All rights reserved.</p>
+    <p>© 2025 LinkCipher. All rights reserved. | <a href="#" id="dark-mode-toggle" class="underline">Toggle Dark Mode</a></p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/p5@1.4.2/lib/p5.js"></script>

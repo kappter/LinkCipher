@@ -3,6 +3,29 @@ body {
   font-family: Arial, sans-serif;
 }
 
+body.dark-mode {
+  background-color: #1a202c;
+  color: #e2e8f0;
+}
+
+body.dark-mode header, body.dark-mode footer {
+  background-color: #2d3748;
+}
+
+body.dark-mode #home-screen div, body.dark-mode #survey-screen, body.dark-mode #code-entry-screen, body.dark-mode #results-screen {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+body.dark-mode #skip-question, body.dark-mode #random-code {
+  background-color: #4a5568;
+  color: #e2e8f0;
+}
+
+body.dark-mode #skip-question:hover, body.dark-mode #random-code:hover {
+  background-color: #718096;
+}
+
 header, footer {
   background-color: #2E6DB4; /* Mariner Blue default */
 }
@@ -17,6 +40,14 @@ button:hover {
 
 .spectrum-radio {
   margin: 0.5rem;
+}
+
+.color-picker {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 #visualization {
