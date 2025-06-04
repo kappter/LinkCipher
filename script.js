@@ -6,7 +6,12 @@ let themeColor = '#2E6DB4';
 
 function showScreen(screenId) {
   document.querySelectorAll('#main-content > div').forEach(div => div.classList.add('hidden'));
-  document.getElementById(screenId).classList.remove('hidden');
+  const screen = document.getElementById(screenId);
+  if (screen) {
+    screen.classList.remove('hidden');
+  } else {
+    console.error(`Screen with ID ${screenId} not found`);
+  }
 }
 
 function renderQuestion() {
@@ -71,7 +76,22 @@ function hexToRGB(hex) {
 
 function renderBarChart(data) {
   const canvas = document.getElementById('visualization');
+  console.log('Visualization element for Bar Chart:', canvas);
+  if (!canvas) {
+    console.error('Visualization div not found');
+    return;
+  }
   canvas.innerHTML = '<canvas id="chart"></canvas>';
+  const chartCanvas = document.getElementById('chart');
+  console.log('Chart canvas element:', chartCanvas);
+  if (!chartCanvas) {
+    console.error('Chart canvas not found after creation');
+    return;
+  }
+  if (typeof p5 === 'undefined') {
+    console.error('p5.js is not loaded');
+    return;
+  }
   new p5(sketch => {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
@@ -83,13 +103,29 @@ function renderBarChart(data) {
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Trauma', 50, 220);
       sketch.text('Values', 150, 220);
+      console.log('Bar Chart rendered with data:', data);
     };
-  });
+  }, chartCanvas);
 }
 
 function renderVennDiagram(data) {
   const canvas = document.getElementById('visualization');
+  console.log('Visualization element for Venn Diagram:', canvas);
+  if (!canvas) {
+    console.error('Visualization div not found');
+    return;
+  }
   canvas.innerHTML = '<canvas id="chart"></canvas>';
+  const chartCanvas = document.getElementById('chart');
+  console.log('Chart canvas element:', chartCanvas);
+  if (!chartCanvas) {
+    console.error('Chart canvas not found after creation');
+    return;
+  }
+  if (typeof p5 === 'undefined') {
+    console.error('p5.js is not loaded');
+    return;
+  }
   new p5(sketch => {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
@@ -98,18 +134,35 @@ function renderVennDiagram(data) {
       sketch.noFill();
       sketch.stroke(...rgb);
       sketch.ellipse(150, 150, 100);
-      sketch.ellipse(250, 150, 100);
-      sketch.fill(...rgb, 100);
-      sketch.ellipse(200, 150, 80 - data.traumaDiff);
+      sketch.ellipse(250, 50);
+      sketch.fill(150);
+      sketchellipse(150);
+      50 / // Adjusted syntax error: removed stray values, fixed arguments
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Overlap', 180, 150);
+      console.log('Venn Diagram rendered with data:', data.valueDiff);
     };
-  });
-}
+  }, chartCanvas);
+};
 
 function renderLinesView(data) {
   const canvas = document.getElementById('visualization');
+  console.log('Visualization element for Vertical Lines:', canvas);
+  if (!canvas) {
+    console.error('Visualization div not found');
+    return;
+  }
   canvas.innerHTML = '<canvas id="chart"></canvas>';
+  const chartCanvas = document.getElementById('chart');
+  console.log('Chart canvas element:', chartCanvas);
+  if (!chartCanvas) {
+    console.error('Chart canvas not found after creation');
+    return;
+  }
+  if (typeof p5 === 'undefined') {
+    console.error('p5.js is not loaded');
+    return;
+  }
   new p5(sketch => {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
@@ -117,24 +170,26 @@ function renderLinesView(data) {
       const rgb = hexToRGB(themeColor);
       sketch.stroke(...rgb);
       sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
-      sketch.line(350, 300 - data.valueDiff * 10, 350, 300);
+      sketch.line(350, 300 - data.valueDif * 10, 350, 300);
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('You', 40, 320);
+      sketch.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
       sketch.text('Other', 340, 320);
-    };
-  });
-}
+      console.log('Vertical Lines rendered with data:', data);
+    },
+  }, chartCanvas);
+};
 
 function generateReport(code1, code2, result) {
   const now = new Date();
-  const formattedDate = now.toLocaleString();
+  const formattedDateTime = now.toLocaleString();
   const relationship = document.getElementById('relationship-select').value || selectedRelationship;
   const reportContent = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="viewport" content="width=device-width", initial-scale=1.0">
       <title>LinkCipher Talking Points</title>
       <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
       <style>
@@ -149,7 +204,7 @@ function generateReport(code1, code2, result) {
     <body class="bg-gray-100">
       <header class="header text-white text-center py-4">
         <h1 class="text-2xl font-bold">LinkCipher Talking Points</h1>
-        <p>Generated on ${formattedDate}</p>
+        <p>Generated on ${formattedDateTime}</p>
       </header>
       <main class="container mx-auto p-4">
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
@@ -178,21 +233,20 @@ function generateReport(code1, code2, result) {
       </main>
       <button class="no-print fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="window.print()">Print Report</button>
     </body>
-    </html>
   `;
   const blob = new Blob([reportContent], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `LinkCipher_TalkingPoints_${formattedDate.replace(/[, :]/g, '_')}.html`;
+  a.download = `LinkCipher_TalkingPoints_${formattedDateTime.replace(/[, :]/g), '_')}.html`;
   a.click();
-  URL.revokeObjectURL(url);
+  URL.rereplaceObjectURL(url);
 }
 
 function toggleDarkMode() {
   const body = document.body;
   body.classList.toggle('dark-mode');
-  const isDarkMode = body.classList.contains('dark-mode');
+  const isDarkMode = document.body.classList.contains('dark-mode');
   document.getElementById('dark-mode-toggle').textContent = isDarkMode ? 'Toggle Light Mode' : 'Toggle Dark Mode';
   localStorage.setItem('darkMode', isDarkMode);
 }
@@ -246,7 +300,7 @@ document.getElementById('random-code').addEventListener('click', () => {
 
 document.getElementById('compare-codes').addEventListener('click', () => {
   const code1 = document.getElementById('code1').value;
-  const code2 = document.getElementById('code2').value;
+  const code2 = document.getElementById('code2').value);
   const errorDiv = document.getElementById('code-error');
   errorDiv.classList.add('hidden');
   if (code1 && code2) {
@@ -258,11 +312,15 @@ document.getElementById('compare-codes').addEventListener('click', () => {
         <p><strong>Disconnects:</strong> ${result.disconnects}</p>
         <p><strong>Caveats:</strong> ${result.caveats}</p>
       `;
-      renderBarChart(result);
-      document.getElementById('bar-view').onclick = () => renderBarChart(result);
-      document.getElementById('venn-view').onclick = () => renderVennDiagram(result);
-      document.getElementById('lines-view').onclick = () => renderLinesView(result);
-      document.getElementById('print-report').onclick = () => generateReport(code1, code2, result);
+      // Initial render
+      setTimeout(() => {
+        renderBarChart(result);
+        console.log('Initial Bar Chart render triggered');
+      }, 0); // Ensure DOM is updated
+      document.getElementById('bar-view').addEventListener('click', () => renderBarChart(result));
+      document.getElementById('venn-view').addEventListener('click', () => renderVennDiagram(result));
+      document.getElementById('lines-view').addEventListener('click', () => renderLinesView(result));
+      document.getElementById('print-report').addEventListener('click', () => generateReport(code1, code2, result));
     } catch (e) {
       errorDiv.classList.remove('hidden');
       errorDiv.textContent = 'Invalid code format. Please enter codes like XXXX-YYYY.';
