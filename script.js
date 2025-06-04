@@ -39,7 +39,7 @@ function generateCode(responses) {
   const traumaHex = traumaSum.toString(16).padStart(2, '0').toUpperCase();
   const valueHex = valueSum.toString(16).padStart(2, '0').toUpperCase();
   const code = `${traumaHex}${valueHex}${timestamp}`;
-  return `${code.slice(0, 4)}-${code.slice(4)}`; // e.g., "0F143252" → "0F14-3252"
+  return `${code.slice(0, 4)}-${code.slice(4)}`;
 }
 
 function isValidCode(code) {
@@ -52,15 +52,9 @@ function compareCodes(code1, code2) {
   }
   try {
     const decodeSegment = (code) => {
-      const hexPart = code.split('-')[0]; // First 4 chars: traumaHex + valueHex
-      const traumaHex = hexPart.slice(0, 2); // First 2 chars
-      const valueHex = hexPart.slice(2, 4); // Next 2 chars
-      const traumaSum = parseInt(traumaHex, 16);
-      const valueSum = parseInt(valueHex, 16);
-      if (isNaN(traumaSum) || isNaN(valueSum)) {
-        console.error('Decoding failed for code:', code, 'hexPart:', hexPart, 'traumaHex:', traumaHex, 'valueHex:', valueHex);
-        throw new Error('Invalid hex values');
-      }
+      const hexPart = code.split('-')[0];
+      const traumaSum = parseInt(hexPart.slice(0, 2), 16);
+      const valueSum = parseInt(hexPart.slice(2, 4), 16);
       return { traumaSum, valueSum };
     };
     const { traumaSum: t1, valueSum: v1 } = decodeSegment(code1);
@@ -70,7 +64,7 @@ function compareCodes(code1, code2) {
     const links = traumaDiff < 10 && valueDiff < 10 ? 'You share similar values and experiences.' : 'You have some alignment but may differ in key areas.';
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
-    console.log('Decoded values:', { code1, code2, t1, v1, t2, v2, traumaDiff, valueDiff });
+    console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
     return { links, disconnects, caveats, traumaDiff, valueDiff };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
@@ -102,24 +96,28 @@ function renderBarChart(data) {
     console.error('p5.js is not loaded');
     return;
   }
-  new p5(sketch => {
-    sketch.setup = () => {
-      sketch.createCanvas(400, 300).parent('chart');
-      sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
+  const sketch = new p5(s => {
+    s.setup = () => {
+      s.createCanvas(400, 300).parent('chart');
+      s.background(200); // Debug: Set a distinct background to confirm canvas is visible
+      s.fill(255, 0, 0); // Debug: Red circle to test rendering
+      s.ellipse(200, 150, 50, 50);
       const rgb = hexToRGB(themeColor);
-      sketch.fill(...rgb);
+      s.fill(...rgb);
       if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
-        sketch.rect(50, 200 - data.traumaDiff * 5, 80, data.traumaDiff * 5);
-        sketch.rect(150, 200 - data.valueDiff * 5, 80, data.valueDiff * 5);
+        console.log('Drawing bars with:', { traumaDiff: data.traumaDiff, valueDiff: data.valueDiff });
+        s.rect(50, 200 - data.traumaDiff * 5, 80, data.traumaDiff * 5);
+        s.rect(150, 200 - data.valueDiff * 5, 80, data.valueDiff * 5);
       } else {
-        console.error('Invalid data for Bar Chart:', JSON.stringify(data));
+        console.error('Invalid data for Bar Chart:', data);
       }
-      sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      sketch.text('Trauma', 50, 220);
-      sketch.text('Values', 150, 220);
+      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
+      s.text('Trauma', 50, 220);
+      s.text('Values', 150, 220);
       console.log('Bar Chart rendered with data:', JSON.stringify(data));
     };
   }, chartCanvas);
+  return sketch; // Store the sketch to prevent garbage collection
 }
 
 function renderVennDiagram(data) {
@@ -140,22 +138,25 @@ function renderVennDiagram(data) {
     console.error('p5.js is not loaded');
     return;
   }
-  new p5(sketch => {
-    sketch.setup = () => {
-      sketch.createCanvas(400, 300).parent('chart');
-      sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
+  const sketch = new p5(s => {
+    s.setup = () => {
+      s.createCanvas(400, 300).parent('chart');
+      s.background(200); // Debug: Set a distinct background
+      s.fill(255, 0, 0); // Debug: Red circle to test rendering
+      s.ellipse(200, 150, 50, 50);
       const rgb = hexToRGB(themeColor);
-      sketch.noFill();
-      sketch.stroke(...rgb);
-      sketch.ellipse(150, 150, 100, 100);
-      sketch.ellipse(250, 150, 100, 100);
-      sketch.fill(150);
-      sketch.ellipse(200, 150, 100, 100);
-      sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      sketch.text('Overlap', 180, 150);
+      s.noFill();
+      s.stroke(...rgb);
+      s.ellipse(150, 150, 100, 100);
+      s.ellipse(250, 150, 100, 100);
+      s.fill(150);
+      s.ellipse(200, 150, 100, 100);
+      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
+      s.text('Overlap', 180, 150);
       console.log('Venn Diagram rendered with data:', JSON.stringify(data));
     };
   }, chartCanvas);
+  return sketch;
 }
 
 function renderLinesView(data) {
@@ -176,25 +177,29 @@ function renderLinesView(data) {
     console.error('p5.js is not loaded');
     return;
   }
-  new p5(sketch => {
-    sketch.setup = () => {
-      sketch.createCanvas(400, 300).parent('chart');
-      sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
+  const sketch = new p5(s => {
+    s.setup = () => {
+      s.createCanvas(400, 300).parent('chart');
+      s.background(200); // Debug: Set a distinct background
+      s.fill(255, 0, 0); // Debug: Red circle to test rendering
+      s.ellipse(200, 150, 50, 50);
       const rgb = hexToRGB(themeColor);
-      sketch.stroke(...rgb);
+      s.stroke(...rgb);
       if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
-        sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
-        sketch.line(350, 300 - data.valueDiff * 10, 350, 300);
+        console.log('Drawing lines with:', { traumaDiff: data.traumaDiff, valueDiff: data.valueDiff });
+        s.line(50, 300 - data.traumaDiff * 10, 50, 300);
+        s.line(350, 300 - data.valueDiff * 10, 350, 300);
       } else {
-        console.error('Invalid data for Vertical Lines:', JSON.stringify(data));
+        console.error('Invalid data for Vertical Lines:', data);
       }
-      sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      sketch.text('You', 40, 320);
-      sketch.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
-      sketch.text('Other', 340, 320);
+      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
+      s.text('You', 40, 320);
+      s.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
+      s.text('Other', 340, 320);
       console.log('Vertical Lines rendered with data:', JSON.stringify(data));
     };
   }, chartCanvas);
+  return sketch;
 }
 
 function generateReport(code1, code2, result) {
@@ -301,11 +306,11 @@ document.getElementById('skip-question').addEventListener('click', () => {
   responses[questions[currentQuestionIndex].id] = 3;
   currentQuestionIndex++;
   if (currentQuestionIndex < questions.length) {
-    renderQuestion();
+      renderQuestion();
   } else {
-    userCode = generateCode(responses);
-    showScreen('code-entry-screen');
-    document.getElementById('code1').value = userCode;
+      userCode = generateCode(responses);
+      showScreen('code-entry-screen');
+      document.getElementById('code1').value = userCode;
   }
 });
 
@@ -314,6 +319,8 @@ document.getElementById('random-code').addEventListener('click', () => {
   questions.forEach(q => randomResponses[q.id] = Math.floor(Math.random() * 5) + 1);
   document.getElementById('code2').value = generateCode(randomResponses);
 });
+
+let currentSketch = null; // Store the current sketch to manage instances
 
 document.getElementById('compare-codes').addEventListener('click', () => {
   const code1 = document.getElementById('code1').value;
@@ -329,15 +336,49 @@ document.getElementById('compare-codes').addEventListener('click', () => {
         <p><strong>Disconnects:</strong> ${result.disconnects}</p>
         <p><strong>Caveats:</strong> ${result.caveats}</p>
       `;
+      // Clean up previous sketch if it exists
+      if (currentSketch) {
+        currentSketch.remove();
+        currentSketch = null;
+      }
       // Initial render
       setTimeout(() => {
-        renderBarChart(result);
+        currentSketch = renderBarChart(result);
         console.log('Initial Bar Chart render triggered');
-      }, 0); // Ensure DOM is updated
-      document.getElementById('bar-view').addEventListener('click', () => renderBarChart(result));
-      document.getElementById('venn-view').addEventListener('click', () => renderVennDiagram(result));
-      document.getElementById('lines-view').addEventListener('click', () => renderLinesView(result));
-      document.getElementById('print-report').addEventListener('click', () => generateReport(code1, code2, result));
+      }, 0);
+      // Remove existing listeners to prevent duplicates
+      const barView = document.getElementById('bar-view');
+      const vennView = document.getElementById('venn-view');
+      const linesView = document.getElementById('lines-view');
+      const printReport = document.getElementById('print-report');
+      const barClone = barView.cloneNode(true);
+      const vennClone = vennView.cloneNode(true);
+      const linesClone = linesView.cloneNode(true);
+      const printClone = printReport.cloneNode(true);
+      barView.replaceWith(barClone);
+      vennView.replaceWith(vennClone);
+      linesView.replaceWith(linesClone);
+      printReport.replaceWith(printClone);
+      // Add new listeners
+      barClone.addEventListener('click', () => {
+        if (currentSketch) {
+          currentSketch.remove();
+        }
+        currentSketch = renderBarChart(result);
+      });
+      vennClone.addEventListener('click', () => {
+        if (currentSketch) {
+          currentSketch.remove();
+        }
+        currentSketch = renderVennDiagram(result);
+      });
+      linesClone.addEventListener('click', () => {
+        if (currentSketch) {
+          currentSketch.remove();
+        }
+        currentSketch = renderLinesView(result);
+      });
+      printClone.addEventListener('click', () => generateReport(code1, code2, result));
     } catch (e) {
       errorDiv.classList.remove('hidden');
       errorDiv.textContent = e.message;
