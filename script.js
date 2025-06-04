@@ -62,6 +62,13 @@ function compareCodes(code1, code2) {
   }
 }
 
+function hexToRGB(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return [r, g, b];
+}
+
 function renderBarChart(data) {
   const canvas = document.getElementById('visualization');
   canvas.innerHTML = '<canvas id="chart"></canvas>';
@@ -69,7 +76,8 @@ function renderBarChart(data) {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
       sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
-      sketch.fill(themeColor);
+      const rgb = hexToRGB(themeColor);
+      sketch.fill(...rgb);
       sketch.rect(50, 200 - data.traumaDiff * 5, 80, data.traumaDiff * 5);
       sketch.rect(150, 200 - data.valueDiff * 5, 80, data.valueDiff * 5);
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
@@ -86,11 +94,12 @@ function renderVennDiagram(data) {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
       sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
+      const rgb = hexToRGB(themeColor);
       sketch.noFill();
-      sketch.stroke(themeColor);
+      sketch.stroke(...rgb);
       sketch.ellipse(150, 150, 100);
       sketch.ellipse(250, 150, 100);
-      sketch.fill(themeColor, 100);
+      sketch.fill(...rgb, 100);
       sketch.ellipse(200, 150, 80 - data.traumaDiff);
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Overlap', 180, 150);
@@ -105,7 +114,8 @@ function renderLinesView(data) {
     sketch.setup = () => {
       sketch.createCanvas(400, 300).parent('chart');
       sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
-      sketch.stroke(themeColor);
+      const rgb = hexToRGB(themeColor);
+      sketch.stroke(...rgb);
       sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
       sketch.line(350, 300 - data.valueDiff * 10, 350, 300);
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
@@ -113,6 +123,70 @@ function renderLinesView(data) {
       sketch.text('Other', 340, 320);
     };
   });
+}
+
+function generateReport(code1, code2, result) {
+  const now = new Date();
+  const formattedDate = now.toLocaleString();
+  const relationship = document.getElementById('relationship-select').value || selectedRelationship;
+  const reportContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>LinkCipher Talking Points</title>
+      <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+      <style>
+        @media print {
+          body { margin: 0; }
+          .no-print { display: none; }
+        }
+        body { font-family: Arial, sans-serif; }
+        .header { background-color: ${themeColor}; }
+      </style>
+    </head>
+    <body class="bg-gray-100">
+      <header class="header text-white text-center py-4">
+        <h1 class="text-2xl font-bold">LinkCipher Talking Points</h1>
+        <p>Generated on ${formattedDate}</p>
+      </header>
+      <main class="container mx-auto p-4">
+        <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
+          <h2 class="text-xl font-semibold mb-2">Overview</h2>
+          <p><strong>Relationship Type:</strong> ${relationship.charAt(0).toUpperCase() + relationship.slice(1)}</p>
+          <p><strong>Code 1:</strong> ${code1}</p>
+          <p><strong>Code 2:</strong> ${code2}</p>
+        </section>
+        <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
+          <h2 class="text-xl font-semibold mb-2">Compatibility Summary</h2>
+          <h3 class="text-lg font-medium">Links</h3>
+          <p>${result.links}</p>
+          <h3 class="text-lg font-medium">Disconnects</h3>
+          <p>${result.disconnects}</p>
+          <h3 class="text-lg font-medium">Caveats</h3>
+          <p>${result.caveats}</p>
+        </section>
+        <section class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-xl font-semibold mb-2">Discussion Points</h2>
+          <ul class="list-disc pl-5">
+            <li>Explore shared values and experiences to strengthen the relationship.</li>
+            <li>Discuss areas of difference to understand potential challenges.</li>
+            <li>Consider communication strategies to address identified caveats.</li>
+          </ul>
+        </section>
+      </main>
+      <button class="no-print fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="window.print()">Print Report</button>
+    </body>
+    </html>
+  `;
+  const blob = new Blob([reportContent], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `LinkCipher_TalkingPoints_${formattedDate.replace(/[, :]/g, '_')}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function toggleDarkMode() {
@@ -188,6 +262,7 @@ document.getElementById('compare-codes').addEventListener('click', () => {
       document.getElementById('bar-view').onclick = () => renderBarChart(result);
       document.getElementById('venn-view').onclick = () => renderVennDiagram(result);
       document.getElementById('lines-view').onclick = () => renderLinesView(result);
+      document.getElementById('print-report').onclick = () => generateReport(code1, code2, result);
     } catch (e) {
       errorDiv.classList.remove('hidden');
       errorDiv.textContent = 'Invalid code format. Please enter codes like XXXX-YYYY.';
