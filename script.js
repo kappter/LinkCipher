@@ -35,11 +35,11 @@ function generateCode(responses) {
   const traumaSum = traumaKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
   const valueSum = valueKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
   const now = new Date();
-  const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-  const rawData = `${traumaSum}-${valueSum}-${timestamp}`;
-  const encoded = btoa(rawData); // Full base64 encoding without truncation
-  const hash = encoded.replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase(); // Keep 8 chars for brevity
-  return `${hash.slice(0, 4)}-${hash.slice(4)}`; // Maintain XXXX-YYYY format
+  const timestamp = `${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`; // Use MMSS for brevity
+  const traumaHex = traumaSum.toString(16).padStart(2, '0').toUpperCase(); // e.g., 15 -> "0F"
+  const valueHex = valueSum.toString(16).padStart(2, '0').toUpperCase(); // e.g., 20 -> "14"
+  const code = `${traumaHex}${valueHex}${timestamp}`; // e.g., "0F143252" for traumaSum=15, valueSum=20, MMSS=3252
+  return `${code.slice(0, 4)}-${code.slice(4)}`; // e.g., "0F14-3252"
 }
 
 function isValidCode(code) {
@@ -51,23 +51,23 @@ function compareCodes(code1, code2) {
     throw new Error('Invalid code format');
   }
   try {
-    const decodeSegment = (segment) => {
-      const padded = segment + '='.repeat((4 - (segment.length % 4)) % 4);
-      const fullEncoded = atob(padded); // Decode the full segment
-      const [traumaSum1, valueSum1, timestamp1] = fullEncoded.split('-').map(Number); // Split and convert
-      return { traumaSum: traumaSum1, valueSum: valueSum1 };
+    const decodeSegment = (code) => {
+      const hexPart = code.split('-')[0]; // First 4 chars: traumaHex + valueHex
+      const traumaSum = parseInt(hexPart.slice(0, 2), 16); // First 2 chars as hex
+      const valueSum = parseInt(hexPart.slice(2, 4), 16); // Next 2 chars as hex
+      return { traumaSum, valueSum };
     };
-    const [seg1, seg2] = [code1.split('-')[0], code2.split('-')[0]]; // Use first 4 chars for simplicity
-    const { traumaSum: t1, valueSum: v1 } = decodeSegment(seg1);
-    const { traumaSum: t2, valueSum: v2 } = decodeSegment(seg2);
+    const { traumaSum: t1, valueSum: v1 } = decodeSegment(code1);
+    const { traumaSum: t2, valueSum: v2 } = decodeSegment(code2);
     const traumaDiff = Math.abs(t1 - t2);
     const valueDiff = Math.abs(v1 - v2);
     const links = traumaDiff < 10 && valueDiff < 10 ? 'You share similar values and experiences.' : 'You have some alignment but may differ in key areas.';
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
+    console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
     return { links, disconnects, caveats, traumaDiff, valueDiff };
   } catch (e) {
-    throw new Error('Invalid code format or decoding failed');
+    throw new Error('Invalid code format or decoding failed: ' + e.message);
   }
 }
 
@@ -102,12 +102,16 @@ function renderBarChart(data) {
       sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
       const rgb = hexToRGB(themeColor);
       sketch.fill(...rgb);
-      sketch.rect(50, 200 - data.traumaDiff * 5, 80, data.traumaDiff * 5);
-      sketch.rect(150, 200 - data.valueDiff * 5, 80, data.valueDiff * 5);
+      if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
+        sketch.rect(50, 200 - data.traumaDiff * 5, 80, data.traumaDiff * 5);
+        sketch.rect(150, 200 - data.valueDiff * 5, 80, data.valueDiff * 5);
+      } else {
+        console.error('Invalid data for Bar Chart:', data);
+      }
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Trauma', 50, 220);
       sketch.text('Values', 150, 220);
-      console.log('Bar Chart rendered with data:', data);
+      console.log('Bar Chart rendered with data:', JSON.stringify(data));
     };
   }, chartCanvas);
 }
@@ -143,7 +147,7 @@ function renderVennDiagram(data) {
       sketch.ellipse(200, 150, 100, 100);
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Overlap', 180, 150);
-      console.log('Venn Diagram rendered with data:', data.valueDiff);
+      console.log('Venn Diagram rendered with data:', JSON.stringify(data));
     };
   }, chartCanvas);
 }
@@ -172,13 +176,17 @@ function renderLinesView(data) {
       sketch.background(document.body.classList.contains('dark-mode') ? 50 : 255);
       const rgb = hexToRGB(themeColor);
       sketch.stroke(...rgb);
-      sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
-      sketch.line(350, 300 - data.valueDiff * 10, 350, 300);
+      if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
+        sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
+        sketch.line(350, 300 - data.valueDiff * 10, 350, 300);
+      } else {
+        console.error('Invalid data for Vertical Lines:', data);
+      }
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('You', 40, 320);
       sketch.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
       sketch.text('Other', 340, 320);
-      console.log('Vertical Lines rendered with data:', data);
+      console.log('Vertical Lines rendered with data:', JSON.stringify(data));
     };
   }, chartCanvas);
 }
