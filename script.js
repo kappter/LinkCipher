@@ -133,17 +133,16 @@ function renderVennDiagram(data) {
       const rgb = hexToRGB(themeColor);
       sketch.noFill();
       sketch.stroke(...rgb);
-      sketch.ellipse(150, 150, 100);
-      sketch.ellipse(250, 50);
+      sketch.ellipse(150, 150, 100, 100); // Fixed syntax: added missing arguments
+      sketch.ellipse(250, 150, 100, 100);
       sketch.fill(150);
-      sketchellipse(150);
-      50 / // Adjusted syntax error: removed stray values, fixed arguments
+      sketch.ellipse(200, 150, 100, 100); // Overlap circle
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('Overlap', 180, 150);
       console.log('Venn Diagram rendered with data:', data.valueDiff);
     };
   }, chartCanvas);
-};
+}
 
 function renderLinesView(data) {
   const canvas = document.getElementById('visualization');
@@ -170,15 +169,15 @@ function renderLinesView(data) {
       const rgb = hexToRGB(themeColor);
       sketch.stroke(...rgb);
       sketch.line(50, 300 - data.traumaDiff * 10, 50, 300);
-      sketch.line(350, 300 - data.valueDif * 10, 350, 300);
+      sketch.line(350, 300 - data.valueDiff * 10, 350, 300); // Fixed typo: valueDiff
       sketch.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
       sketch.text('You', 40, 320);
       sketch.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
       sketch.text('Other', 340, 320);
       console.log('Vertical Lines rendered with data:', data);
-    },
+    };
   }, chartCanvas);
-};
+}
 
 function generateReport(code1, code2, result) {
   const now = new Date();
@@ -238,9 +237,9 @@ function generateReport(code1, code2, result) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `LinkCipher_TalkingPoints_${formattedDateTime.replace(/[, :]/g), '_')}.html`;
+  a.download = `LinkCipher_TalkingPoints_${formattedDateTime.replace(/[, :]/g, '_')}.html`;
   a.click();
-  URL.rereplaceObjectURL(url);
+  URL.revokeObjectURL(url); // Fixed typo: rereplaceObjectURL to revokeObjectURL
 }
 
 function toggleDarkMode() {
@@ -300,7 +299,7 @@ document.getElementById('random-code').addEventListener('click', () => {
 
 document.getElementById('compare-codes').addEventListener('click', () => {
   const code1 = document.getElementById('code1').value;
-  const code2 = document.getElementById('code2').value);
+  const code2 = document.getElementById('code2').value;
   const errorDiv = document.getElementById('code-error');
   errorDiv.classList.add('hidden');
   if (code1 && code2) {
