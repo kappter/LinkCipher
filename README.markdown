@@ -1,6 +1,6 @@
 # LinkCipher
 
-LinkCipher is a web-based app that helps users discover compatibility in relationships—whether romantic, professional, familial, or otherwise—through a unique, privacy-focused approach. By taking an adaptive survey, users generate a cryptic, time-stamped code that encapsulates their core values and life experiences. Share this code with another person to reveal links, disconnects, and caveats, presented in engaging visualizations like bar charts, Venn diagrams, or vertical lines. No data is stored, ensuring complete privacy.
+[LinkCipher](https://kappter.github.io/LinkCipher/index.html) is a web-based app that helps users discover compatibility in relationships—whether romantic, professional, familial, or otherwise—through a unique, privacy-focused approach. By taking an adaptive survey, users generate a cryptic, time-stamped code that encapsulates their core values and life experiences. Share this code with another person to reveal links, disconnects, and caveats, presented in engaging visualizations like bar charts, Venn diagrams, or vertical lines. No data is stored, ensuring complete privacy.
 
 ## Features
 
