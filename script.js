@@ -284,22 +284,35 @@ function generateReport(code1, code2, result) {
   
   const traumaKeys = ['violence', 'divorce', 'neglect', 'illness', 'money', 'estrangement', 'addiction', 'death'];
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
-  let person1TraumaBreakdown = '';
-  let person1ValuesBreakdown = '';
+
+  // Side-by-side comparison for Trauma
+  let traumaComparison = '';
   if (result.person1Responses) {
-    person1TraumaBreakdown = traumaKeys.map(key => {
-      const score = result.person1Responses[key] || 3;
+    traumaComparison = traumaKeys.map(key => {
+      const score1 = result.person1Responses[key] || 3;
       const question = questions.find(q => q.id === key)?.text || key;
-      return `<tr><td>${question}</td><td>${score}</td></tr>`;
+      return `<tr><td>${question}</td><td>${score1}</td><td>N/A</td></tr>`;
     }).join('');
-    person1ValuesBreakdown = valueKeys.map(key => {
-      const score = result.person1Responses[key] || 3;
-      const question = questions.find(q => q.id === key)?.text || key;
-      return `<tr><td>${question}</td><td>${score}</td></tr>`;
-    }).join('');
+    // Add a totals row
+    traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
   } else {
-    person1TraumaBreakdown = '<tr><td colspan="2">Detailed responses not available.</td></tr>';
-    person1ValuesBreakdown = '<tr><td colspan="2">Detailed responses not available.</td></tr>';
+    traumaComparison = `<tr><td colspan="3">Detailed responses for Person 1 not available.</td></tr>`;
+    traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
+  }
+
+  // Side-by-side comparison for Values
+  let valuesComparison = '';
+  if (result.person1Responses) {
+    valuesComparison = valueKeys.map(key => {
+      const score1 = result.person1Responses[key] || 3;
+      const question = questions.find(q => q.id === key)?.text || key;
+      return `<tr><td>${question}</td><td>${score1}</td><td>N/A</td></tr>`;
+    }).join('');
+    // Add a totals row
+    valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
+  } else {
+    valuesComparison = `<tr><td colspan="3">Detailed responses for Person 1 not available.</td></tr>`;
+    valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
   }
 
   const reportContent = `
@@ -364,33 +377,35 @@ function generateReport(code1, code2, result) {
           </ul>
         </section>
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
-          <h2 class="text-xl font-semibold mb-2">Detailed Analysis of Scores</h2>
-          <h3 class="text-lg font-medium">Person 1 Trauma Breakdown</h3>
+          <h2 class="text-xl font-semibold mb-2">Detailed Comparison of Scores</h2>
+          <h3 class="text-lg font-medium">Trauma Comparison (Person 1 vs Person 2)</h3>
           <table>
             <thead>
               <tr>
                 <th>Question</th>
-                <th>Score</th>
+                <th>Person 1 Score</th>
+                <th>Person 2 Score</th>
               </tr>
             </thead>
             <tbody>
-              ${person1TraumaBreakdown}
+              ${traumaComparison}
             </tbody>
           </table>
-          <h3 class="text-lg font-medium mt-4">Person 1 Values Breakdown</h3>
+          <p class="mt-2 text-sm text-gray-600">Note: Person 2's individual scores are not available as only their total score was provided. A full side-by-side comparison requires both individuals' detailed survey responses.</p>
+          <h3 class="text-lg font-medium mt-4">Values Comparison (Person 1 vs Person 2)</h3>
           <table>
             <thead>
               <tr>
                 <th>Question</th>
-                <th>Score</th>
+                <th>Person 1 Score</th>
+                <th>Person 2 Score</th>
               </tr>
             </thead>
             <tbody>
-              ${person1ValuesBreakdown}
+              ${valuesComparison}
             </tbody>
           </table>
-          <h3 class="text-lg font-medium mt-4">Person 2 Breakdown</h3>
-          <p>Detailed breakdown for Person 2 is not available as individual responses were not provided. Total scores: Trauma (${result.t2}), Values (${result.v2}).</p>
+          <p class="mt-2 text-sm text-gray-600">Note: Person 2's individual scores are not available as only their total score was provided.</p>
         </section>
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
           <h2 class="text-xl font-semibold mb-2">Visualizations</h2>
