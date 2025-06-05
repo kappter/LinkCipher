@@ -124,7 +124,7 @@ function renderBarChart(data) {
       scales: {
         y: {
           beginAtZero: true,
-          max: 50, // Adjusted max to fit typical trauma/value sums
+          max: 50,
           ticks: { color: textColor },
           grid: { color: textColor }
         },
@@ -160,7 +160,7 @@ function renderVennDiagram(data) {
     </div>
   `;
   console.log('Venn Diagram rendered with data:', JSON.stringify(data));
-  return null; // No Chart.js instance to return
+  return null;
 }
 
 function renderLinesView(data) {
@@ -234,14 +234,21 @@ function generateReport(code1, code2, result) {
   const now = new Date();
   const formattedDateTime = now.toLocaleString();
   const relationship = document.getElementById('relationship-select').value || selectedRelationship;
+  
+  // Calculate financial and health implications based on trauma and value differences
+  const financialImpact = result.traumaDiff > 10 ? 'Potential misalignment in financial priorities due to differing life experiences.' : 'Likely alignment in financial priorities.';
+  const healthImpact = result.valueDiff > 10 ? 'Differences in values may affect health-related decisions or stress levels.' : 'Shared values support aligned health decisions.';
+  
+  // Prepare the report content with detailed breakdowns
   const reportContent = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width", initial-scale=1.0">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>LinkCipher Talking Points</title>
       <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
       <style>
         @media print {
           body { margin: 0; }
@@ -249,6 +256,14 @@ function generateReport(code1, code2, result) {
         }
         body { font-family: Arial, sans-serif; }
         .header { background-color: ${themeColor}; }
+        .venn-container { position: relative; width: 400px; height: 300px; margin: auto; }
+        .venn-circle { position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 2px solid; }
+        .venn-left { left: 50px; top: 50px; }
+        .venn-right { right: 50px; top: 50px; }
+        .venn-overlap { position: absolute; top: 140px; left: 175px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
       </style>
     </head>
     <body class="bg-gray-100">
@@ -260,17 +275,70 @@ function generateReport(code1, code2, result) {
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
           <h2 class="text-xl font-semibold mb-2">Overview</h2>
           <p><strong>Relationship Type:</strong> ${relationship.charAt(0).toUpperCase() + relationship.slice(1)}</p>
-          <p><strong>Code 1:</strong> ${code1}</p>
-          <p><strong>Code 2:</strong> ${code2}</p>
+          <p><strong>Code 1 (Person 1):</strong> ${code1}</p>
+          <p><strong>Code 2 (Person 2):</strong> ${code2}</p>
         </section>
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
           <h2 class="text-xl font-semibold mb-2">Compatibility Summary</h2>
           <h3 class="text-lg font-medium">Links</h3>
           <p>${result.links}</p>
-          <h3 class="text-lg font-medium">Disconnects</h3>
+          <ul class="list-disc pl-5 mt-2">
+            <li><strong>Finances:</strong> ${financialImpact}</li>
+            <li><strong>Health:</strong> ${healthImpact}</li>
+            <li><strong>Trauma Measurable:</strong> Person 1: ${result.t1}, Person 2: ${result.t2}</li>
+            <li><strong>Values Measurable:</strong> Person 1: ${result.v1}, Person 2: ${result.v2}</li>
+          </ul>
+          <h3 class="text-lg font-medium mt-4">Disconnects</h3>
           <p>${result.disconnects}</p>
-          <h3 class="text-lg font-medium">Caveats</h3>
+          <ul class="list-disc pl-5 mt-2">
+            <li><strong>Finances:</strong> ${result.traumaDiff > 15 ? 'Significant differences may lead to financial disagreements.' : 'Minor differences may require occasional adjustments.'}</li>
+            <li><strong>Health:</strong> ${result.valueDiff > 15 ? 'Value differences may cause health-related tensions.' : 'Minor value differences should be manageable.'}</li>
+            <li><strong>Trauma Measurable Difference:</strong> ${result.traumaDiff}</li>
+            <li><strong>Values Measurable Difference:</strong> ${result.valueDiff}</li>
+          </ul>
+          <h3 class="text-lg font-medium mt-4">Caveats</h3>
           <p>${result.caveats}</p>
+          <ul class="list-disc pl-5 mt-2">
+            <li><strong>Finances:</strong> ${result.traumaDiff > 10 || result.valueDiff > 10 ? 'Discuss financial goals to bridge gaps.' : 'Alignment supports shared financial planning.'}</li>
+            <li><strong>Health:</strong> ${result.traumaDiff > 10 || result.valueDiff > 10 ? 'Monitor health impacts from differing experiences.' : 'Shared experiences support health alignment.'}</li>
+            <li><strong>Trauma Consideration:</strong> Difference of ${result.traumaDiff} may ${result.traumaDiff > 10 ? 'require empathy' : 'be manageable'}</li>
+            <li><strong>Values Consideration:</strong> Difference of ${result.valueDiff} may ${result.valueDiff > 10 ? 'need alignment' : 'be harmonious'}</li>
+          </ul>
+        </section>
+        <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
+          <h2 class="text-xl font-semibold mb-2">Visualizations</h2>
+          <h3 class="text-lg font-medium">Bar Chart</h3>
+          <canvas id="bar-chart" width="400" height="300"></canvas>
+          <h3 class="text-lg font-medium mt-4">Venn Diagram</h3>
+          <div class="venn-container">
+            <div class="venn-circle venn-left" style="border-color: ${themeColor};"></div>
+            <div class="venn-circle venn-right" style="border-color: ${themeColor};"></div>
+            <div class="venn-overlap">Overlap</div>
+          </div>
+          <h3 class="text-lg font-medium mt-4">Vertical Lines</h3>
+          <canvas id="lines-chart" width="400" height="300"></canvas>
+          <h3 class="text-lg font-medium mt-4">Points Breakdown</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Person</th>
+                <th>Trauma Sum</th>
+                <th>Values Sum</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Person 1</td>
+                <td>${result.t1}</td>
+                <td>${result.v1}</td>
+              </tr>
+              <tr>
+                <td>Person 2</td>
+                <td>${result.t2}</td>
+                <td>${result.v2}</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
         <section class="bg-white p-6 rounded-lg shadow-lg">
           <h2 class="text-xl font-semibold mb-2">Discussion Points</h2>
@@ -282,7 +350,71 @@ function generateReport(code1, code2, result) {
         </section>
       </main>
       <button class="no-print fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="window.print()">Print Report</button>
+      <script>
+        const rgb = [${hexToRGB(themeColor).join(', ')}];
+        // Render Bar Chart
+        const barChart = new Chart(document.getElementById('bar-chart'), {
+          type: 'bar',
+          data: {
+            labels: ['Trauma', 'Values'],
+            datasets: [
+              {
+                label: 'Person 1',
+                data: [${result.t1}, ${result.v1}],
+                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.7)',
+                borderColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
+                borderWidth: 1
+              },
+              {
+                label: 'Person 2',
+                data: [${result.t2}, ${result.v2}],
+                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.3)',
+                borderColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            scales: {
+              y: { beginAtZero: true, max: 50 },
+              x: {}
+            }
+          }
+        });
+        // Render Lines Chart
+        const linesChart = new Chart(document.getElementById('lines-chart'), {
+          type: 'line',
+          data: {
+            labels: ['You', 'Other'],
+            datasets: [
+              {
+                label: 'Trauma',
+                data: [${result.traumaDiff}, ${result.traumaDiff}],
+                borderColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false
+              },
+              {
+                label: 'Values',
+                data: [${result.valueDiff}, ${result.valueDiff}],
+                borderColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.5)',
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            scales: {
+              y: { beginAtZero: true, max: 30 },
+              x: {}
+            }
+          }
+        });
+      </script>
     </body>
+    </html>
   `;
   const blob = new Blob([reportContent], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
@@ -299,7 +431,6 @@ function toggleDarkMode() {
   const isDarkMode = document.body.classList.contains('dark-mode');
   document.getElementById('dark-mode-toggle').textContent = isDarkMode ? 'Toggle Light Mode' : 'Toggle Dark Mode';
   localStorage.setItem('darkMode', isDarkMode);
-  // Re-render the current chart if it exists
   if (currentChart) {
     const data = currentChart.data;
     currentChart.destroy();
@@ -443,7 +574,6 @@ document.getElementById('theme-color').addEventListener('change', (e) => {
     btn.classList.remove('bg-blue-500');
     btn.classList.add('bg-custom');
   });
-  // Re-render the current chart if it exists
   if (currentChart) {
     const data = currentChart.data;
     currentChart.destroy();
