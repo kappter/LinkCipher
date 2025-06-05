@@ -327,7 +327,7 @@ function generateReport(code1, code2, result) {
     <body class="bg-gray-100">
       <header class="header text-white text-center py-4">
         <h1 class="text-2xl font-bold">LinkCipher Talking Points</h1>
-        <p>Generated on ${formattedDateTime}</p>
+        <p class="subtitle">Generated on ${formattedDateTime}</p>
       </header>
       <main class="container mx-auto p-4">
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
