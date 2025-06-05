@@ -92,60 +92,46 @@ function renderBarChart(data) {
     console.error('Chart canvas not found after creation');
     return;
   }
-  if (typeof p5 === 'undefined') {
-    console.error('p5.js is not loaded');
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js is not loaded');
     return;
   }
-  // Fallback: Test native canvas drawing
-  const ctx = chartCanvas.getContext('2d');
-  if (ctx) {
-    ctx.fillStyle = 'green';
-    ctx.fillRect(10, 10, 50, 50); // Debug: Green square
-    console.log('Native canvas drawing test completed');
-  } else {
-    console.error('Failed to get 2D context for canvas');
-  }
-  const sketch = new p5(s => {
-    s.setup = () => {
-      s.createCanvas(400, 300, s.P2D).parent('chart'); // Force 2D context
-      s.background(200); // Debug: Gray background
-      s.fill(255, 0, 0); // Debug: Red circle
-      s.ellipse(200, 150, 50, 50); // Debug: Test shape
-      console.log('p5.js setup completed, canvas size:', s.width, s.height);
-      const rgb = hexToRGB(themeColor);
-      s.fill(...rgb);
-      if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
-        const traumaY = 200 - data.traumaDiff * 5;
-        const valueY = 200 - data.valueDiff * 5;
-        console.log('Drawing bars:', { traumaY, traumaHeight: data.traumaDiff * 5, valueY, valueHeight: data.valueDiff * 5 });
-        s.rect(50, traumaY, 80, data.traumaDiff * 5);
-        s.rect(150, valueY, 80, data.valueDiff * 5);
-      } else {
-        console.error('Invalid data for Bar Chart:', data);
-      }
-      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      s.text('Trauma', 50, 220);
-      s.text('Values', 150, 220);
-      console.log('Bar Chart rendered with data:', JSON.stringify(data));
-    };
-    s.draw = () => {
-      s.background(200); // Refresh background
-      s.fill(255, 0, 0); // Red circle
-      s.ellipse(200, 150, 50, 50); // Ensure circle persists
-      const rgb = hexToRGB(themeColor);
-      s.fill(...rgb);
-      if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
-        const traumaY = 200 - data.traumaDiff * 5;
-        const valueY = 200 - data.valueDiff * 5;
-        s.rect(50, traumaY, 80, data.traumaDiff * 5);
-        s.rect(150, valueY, 80, data.valueDiff * 5);
-      }
-      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      s.text('Trauma', 50, 220);
-      s.text('Values', 150, 220);
-    };
-  }, chartCanvas);
-  return sketch;
+  const rgb = hexToRGB(themeColor);
+  const backgroundColor = document.body.classList.contains('dark-mode') ? '#333' : '#fff';
+  const textColor = document.body.classList.contains('dark-mode') ? '#ccc' : '#333';
+  const chart = new Chart(chartCanvas, {
+    type: 'bar',
+    data: {
+      labels: ['Trauma', 'Values'],
+      datasets: [{
+        label: 'Difference',
+        data: [data.traumaDiff, data.valueDiff],
+        backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.5)`,
+        borderColor: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 30,
+          ticks: { color: textColor },
+          grid: { color: textColor }
+        },
+        x: {
+          ticks: { color: textColor },
+          grid: { color: textColor }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: textColor } }
+      },
+      backgroundColor: backgroundColor
+    }
+  });
+  console.log('Bar Chart rendered with data:', JSON.stringify(data));
+  return chart;
 }
 
 function renderVennDiagram(data) {
@@ -155,59 +141,17 @@ function renderVennDiagram(data) {
     console.error('Visualization div not found');
     return;
   }
-  canvas.innerHTML = '<canvas id="chart"></canvas>';
-  const chartCanvas = document.getElementById('chart');
-  console.log('Chart canvas element:', chartCanvas);
-  if (!chartCanvas) {
-    console.error('Chart canvas not found after creation');
-    return;
-  }
-  if (typeof p5 === 'undefined') {
-    console.error('p5.js is not loaded');
-    return;
-  }
-  const ctx = chartCanvas.getContext('2d');
-  if (ctx) {
-    ctx.fillStyle = 'green';
-    ctx.fillRect(10, 10, 50, 50); // Debug: Green square
-    console.log('Native canvas drawing test completed');
-  } else {
-    console.error('Failed to get 2D context for canvas');
-  }
-  const sketch = new p5(s => {
-    s.setup = () => {
-      s.createCanvas(400, 300, s.P2D).parent('chart');
-      s.background(200); // Debug: Gray background
-      s.fill(255, 0, 0); // Debug: Red circle
-      s.ellipse(200, 150, 50, 50); // Debug: Test shape
-      console.log('p5.js setup completed, canvas size:', s.width, s.height);
-      const rgb = hexToRGB(themeColor);
-      s.noFill();
-      s.stroke(...rgb);
-      s.ellipse(150, 150, 100, 100);
-      s.ellipse(250, 150, 100, 100);
-      s.fill(150);
-      s.ellipse(200, 150, 100, 100);
-      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      s.text('Overlap', 180, 150);
-      console.log('Venn Diagram rendered with data:', JSON.stringify(data));
-    };
-    s.draw = () => {
-      s.background(200); // Refresh background
-      s.fill(255, 0, 0); // Red circle
-      s.ellipse(200, 150, 50, 50); // Ensure circle persists
-      const rgb = hexToRGB(themeColor);
-      s.noFill();
-      s.stroke(...rgb);
-      s.ellipse(150, 150, 100, 100);
-      s.ellipse(250, 150, 100, 100);
-      s.fill(150);
-      s.ellipse(200, 150, 100, 100);
-      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      s.text('Overlap', 180, 150);
-    };
-  }, chartCanvas);
-  return sketch;
+  const rgb = hexToRGB(themeColor);
+  const textColor = document.body.classList.contains('dark-mode') ? '#ccc' : '#333';
+  canvas.innerHTML = `
+    <div class="venn-container">
+      <div class="venn-circle venn-left" style="border-color: rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]});"></div>
+      <div class="venn-circle venn-right" style="border-color: rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]});"></div>
+      <div class="venn-overlap" style="color: ${textColor};">Overlap</div>
+    </div>
+  `;
+  console.log('Venn Diagram rendered with data:', JSON.stringify(data));
+  return null; // No Chart.js instance to return
 }
 
 function renderLinesView(data) {
@@ -224,61 +168,57 @@ function renderLinesView(data) {
     console.error('Chart canvas not found after creation');
     return;
   }
-  if (typeof p5 === 'undefined') {
-    console.error('p5.js is not loaded');
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js is not loaded');
     return;
   }
-  const ctx = chartCanvas.getContext('2d');
-  if (ctx) {
-    ctx.fillStyle = 'green';
-    ctx.fillRect(10, 10, 50, 50); // Debug: Green square
-    console.log('Native canvas drawing test completed');
-  } else {
-    console.error('Failed to get 2D context for canvas');
-  }
-  const sketch = new p5(s => {
-    s.setup = () => {
-      s.createCanvas(400, 300, s.P2D).parent('chart');
-      s.background(200); // Debug: Gray background
-      s.fill(255, 0, 0); // Debug: Red circle
-      s.ellipse(200, 150, 50, 50); // Debug: Test shape
-      console.log('p5.js setup completed, canvas size:', s.width, s.height);
-      const rgb = hexToRGB(themeColor);
-      s.stroke(...rgb);
-      if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
-        const traumaY = 300 - data.traumaDiff * 10;
-        const valueY = 300 - data.valueDiff * 10;
-        console.log('Drawing lines:', { traumaY, valueY });
-        s.line(50, traumaY, 50, 300);
-        s.line(350, valueY, 350, 300);
-      } else {
-        console.error('Invalid data for Vertical Lines:', data);
-      }
-      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      s.text('You', 40, 320);
-      s.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
-      s.text('Other', 340, 320);
-      console.log('Vertical Lines rendered with data:', JSON.stringify(data));
-    };
-    s.draw = () => {
-      s.background(200); // Refresh background
-      s.fill(255, 0, 0); // Red circle
-      s.ellipse(200, 150, 50, 50); // Ensure circle persists
-      const rgb = hexToRGB(themeColor);
-      s.stroke(...rgb);
-      if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
-        const traumaY = 300 - data.traumaDiff * 10;
-        const valueY = 300 - data.valueDiff * 10;
-        s.line(50, traumaY, 50, 300);
-        s.line(350, valueY, 350, 300);
-      }
-      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
-      s.text('You', 40, 320);
-      s.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
-      s.text('Other', 340, 320);
-    };
-  }, chartCanvas);
-  return sketch;
+  const rgb = hexToRGB(themeColor);
+  const backgroundColor = document.body.classList.contains('dark-mode') ? '#333' : '#fff';
+  const textColor = document.body.classList.contains('dark-mode') ? '#ccc' : '#333';
+  const chart = new Chart(chartCanvas, {
+    type: 'line',
+    data: {
+      labels: ['You', 'Other'],
+      datasets: [
+        {
+          label: 'Trauma',
+          data: [data.traumaDiff, data.traumaDiff],
+          borderColor: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`,
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false
+        },
+        {
+          label: 'Values',
+          data: [data.valueDiff, data.valueDiff],
+          borderColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.5)`,
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 30,
+          ticks: { color: textColor },
+          grid: { color: textColor }
+        },
+        x: {
+          ticks: { color: textColor },
+          grid: { color: textColor }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: textColor } }
+      },
+      backgroundColor: backgroundColor
+    }
+  });
+  console.log('Vertical Lines rendered with data:', JSON.stringify(data));
+  return chart;
 }
 
 function generateReport(code1, code2, result) {
@@ -350,6 +290,18 @@ function toggleDarkMode() {
   const isDarkMode = document.body.classList.contains('dark-mode');
   document.getElementById('dark-mode-toggle').textContent = isDarkMode ? 'Toggle Light Mode' : 'Toggle Dark Mode';
   localStorage.setItem('darkMode', isDarkMode);
+  // Re-render the current chart if it exists
+  if (currentChart) {
+    const data = currentChart.data;
+    currentChart.destroy();
+    setTimeout(() => {
+      if (currentView === 'bar') {
+        currentChart = renderBarChart(data);
+      } else if (currentView === 'lines') {
+        currentChart = renderLinesView(data);
+      }
+    }, 100);
+  }
 }
 
 document.getElementById('start-survey').addEventListener('click', () => {
@@ -399,7 +351,8 @@ document.getElementById('random-code').addEventListener('click', () => {
   document.getElementById('code2').value = generateCode(randomResponses);
 });
 
-let currentSketch = null;
+let currentChart = null;
+let currentView = 'bar';
 
 document.getElementById('compare-codes').addEventListener('click', () => {
   const code1 = document.getElementById('code1').value;
@@ -415,13 +368,13 @@ document.getElementById('compare-codes').addEventListener('click', () => {
         <p><strong>Disconnects:</strong> ${result.disconnects}</p>
         <p><strong>Caveats:</strong> ${result.caveats}</p>
       `;
-      if (currentSketch) {
-        currentSketch.remove();
-        currentSketch = null;
+      if (currentChart) {
+        currentChart.destroy();
+        currentChart = null;
       }
-      // Delay to ensure DOM is ready
       setTimeout(() => {
-        currentSketch = renderBarChart(result);
+        currentView = 'bar';
+        currentChart = renderBarChart(result);
         console.log('Initial Bar Chart render triggered');
       }, 100);
       const barView = document.getElementById('bar-view');
@@ -437,21 +390,24 @@ document.getElementById('compare-codes').addEventListener('click', () => {
       linesView.replaceWith(linesClone);
       printReport.replaceWith(printClone);
       barClone.addEventListener('click', () => {
-        if (currentSketch) currentSketch.remove();
+        if (currentChart) currentChart.destroy();
+        currentView = 'bar';
         setTimeout(() => {
-          currentSketch = renderBarChart(result);
+          currentChart = renderBarChart(result);
         }, 100);
       });
       vennClone.addEventListener('click', () => {
-        if (currentSketch) currentSketch.remove();
+        if (currentChart) currentChart.destroy();
+        currentView = 'venn';
         setTimeout(() => {
-          currentSketch = renderVennDiagram(result);
+          currentChart = renderVennDiagram(result);
         }, 100);
       });
       linesClone.addEventListener('click', () => {
-        if (currentSketch) currentSketch.remove();
+        if (currentChart) currentChart.destroy();
+        currentView = 'lines';
         setTimeout(() => {
-          currentSketch = renderLinesView(result);
+          currentChart = renderLinesView(result);
         }, 100);
       });
       printClone.addEventListener('click', () => generateReport(code1, code2, result));
@@ -478,6 +434,20 @@ document.getElementById('theme-color').addEventListener('change', (e) => {
     btn.classList.remove('bg-blue-500');
     btn.classList.add('bg-custom');
   });
+  // Re-render the current chart if it exists
+  if (currentChart) {
+    const data = currentChart.data;
+    currentChart.destroy();
+    setTimeout(() => {
+      if (currentView === 'bar') {
+        currentChart = renderBarChart(data);
+      } else if (currentView === 'venn') {
+        currentChart = renderVennDiagram(data);
+      } else if (currentView === 'lines') {
+        currentChart = renderLinesView(data);
+      }
+    }, 100);
+  }
 });
 
 document.getElementById('dark-mode-toggle').addEventListener('click', (e) => {
