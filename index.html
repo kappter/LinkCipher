@@ -46,9 +46,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>LinkCipher</title>
-  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmEDAAABGUlEQVRYCe2TsUoDQRSGv7iBS0tLgyAIghAEXkFwcCsu3oW9jV/A1oI7sLCwsxPsLCwsLGyEWCiCIIi3qV3SzCQTzO3Ymd3Z5Q8kM5nM5/eb/znnE8eA1gE8sQzYAA4A2wA2gB3AWWiZ2QJ2AOfADmAfsAvYBOwCdgE7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBc4A8As4P4L5C8BPXb5BAAAAAElFTkSuQmCC">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css?ver=1.0.11" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?ver=1.0.11">
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmEDAAABGUlEQVRYCe2TsUoDQRSGv7iBS0tLgyAIghAEXkFwcCsu3oW9jV/A1oI7sLCwsxPsLCwsLGyEWCiCIIi3qV3SzCQTzO3Ymd3Z5Q8kM5nM5/eb/znnE8eA1gE8sQzYAA4A2wA2gB3AWWiZ2QJ2AOfADmAfsAvYBOwCdgE7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBewCdgG7gF3ALmAXsAvYBc4A8As4P4L5C8BPXb5BAAAAAElFTkSuQmCC">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css?ver=1.0.12" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?ver=1.0.12">
   <style>
     .header-container { position: relative; display: inline-block; }
     .logo-title { height: 50px; width: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.3; }
@@ -59,10 +59,13 @@
       width: 400px; 
       height: 300px; 
       margin: 0 auto; 
+      border: 2px solid red; /* Enhanced debug: Bright border */
     }
     #visualization canvas { 
       display: block; 
-      border: 1px solid #000; /* Debug: Add a border to see the canvas */
+      width: 100% !important; 
+      height: 100% !important; 
+      object-fit: contain; 
     }
   </style>
 </head>
@@ -144,11 +147,21 @@
   </main>
 
   <footer class="bg-blue-600 text-white text-center py-2 fixed bottom-0 w-full">
-    <p class="footer-text">© 2025 LinkCipher. All rights reserved. | <a href="#" id="dark-mode-toggle" class="underline">Toggle Dark Mode</a> | <a href="https://kappter.github.io/LinkCipher/index.html" target="_blank" class="underline">More App Info</a></p>
+    <p class="footer-text">© 2025 LinkCipher. All rights reserved. | <a href="#" id="dark-mode-toggle" class="underline">Toggle Dark Mode</a> | <a href="https://github.com/your-username/linkcipher" target="_blank" class="underline">More App Info</a></p>
   </footer>
 
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js?ver=1.0.11"></script>
-  <script src="data.js?ver=1.0.11"></script>
-  <script src="script.js?ver=1.0.11"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js?ver=1.0.12"></script>
+  <script>
+    // Debug: Check if p5.js loaded
+    window.addEventListener('load', () => {
+      if (typeof p5 === 'undefined') {
+        console.error('p5.js failed to load from CDN');
+      } else {
+        console.log('p5.js loaded successfully');
+      }
+    });
+  </script>
+  <script src="data.js?ver=1.0.12"></script>
+  <script src="script.js?ver=1.0.12"></script>
 </body>
 </html>

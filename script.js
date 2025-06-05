@@ -99,15 +99,18 @@ function renderBarChart(data) {
   const sketch = new p5(s => {
     s.setup = () => {
       s.createCanvas(400, 300).parent('chart');
-      s.background(200); // Debug: Set a distinct background to confirm canvas is visible
-      s.fill(255, 0, 0); // Debug: Red circle to test rendering
-      s.ellipse(200, 150, 50, 50);
+      s.background(200); // Debug: Gray background
+      s.fill(255, 0, 0); // Debug: Red circle
+      s.ellipse(200, 150, 50, 50); // Debug: Test shape
+      console.log('p5.js setup completed, canvas size:', s.width, s.height);
       const rgb = hexToRGB(themeColor);
       s.fill(...rgb);
       if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
-        console.log('Drawing bars with:', { traumaDiff: data.traumaDiff, valueDiff: data.valueDiff });
-        s.rect(50, 200 - data.traumaDiff * 5, 80, data.traumaDiff * 5);
-        s.rect(150, 200 - data.valueDiff * 5, 80, data.valueDiff * 5);
+        const traumaY = 200 - data.traumaDiff * 5;
+        const valueY = 200 - data.valueDiff * 5;
+        console.log('Drawing bars:', { traumaY, traumaHeight: data.traumaDiff * 5, valueY, valueHeight: data.valueDiff * 5 });
+        s.rect(50, traumaY, 80, data.traumaDiff * 5);
+        s.rect(150, valueY, 80, data.valueDiff * 5);
       } else {
         console.error('Invalid data for Bar Chart:', data);
       }
@@ -116,8 +119,9 @@ function renderBarChart(data) {
       s.text('Values', 150, 220);
       console.log('Bar Chart rendered with data:', JSON.stringify(data));
     };
+    s.draw = () => {}; // Empty draw to keep sketch alive
   }, chartCanvas);
-  return sketch; // Store the sketch to prevent garbage collection
+  return sketch;
 }
 
 function renderVennDiagram(data) {
@@ -141,9 +145,10 @@ function renderVennDiagram(data) {
   const sketch = new p5(s => {
     s.setup = () => {
       s.createCanvas(400, 300).parent('chart');
-      s.background(200); // Debug: Set a distinct background
-      s.fill(255, 0, 0); // Debug: Red circle to test rendering
-      s.ellipse(200, 150, 50, 50);
+      s.background(200); // Debug: Gray background
+      s.fill(255, 0, 0); // Debug: Red circle
+      s.ellipse(200, 150, 50, 50); // Debug: Test shape
+      console.log('p5.js setup completed, canvas size:', s.width, s.height);
       const rgb = hexToRGB(themeColor);
       s.noFill();
       s.stroke(...rgb);
@@ -155,6 +160,7 @@ function renderVennDiagram(data) {
       s.text('Overlap', 180, 150);
       console.log('Venn Diagram rendered with data:', JSON.stringify(data));
     };
+    s.draw = () => {}; // Empty draw to keep sketch alive
   }, chartCanvas);
   return sketch;
 }
@@ -180,15 +186,18 @@ function renderLinesView(data) {
   const sketch = new p5(s => {
     s.setup = () => {
       s.createCanvas(400, 300).parent('chart');
-      s.background(200); // Debug: Set a distinct background
-      s.fill(255, 0, 0); // Debug: Red circle to test rendering
-      s.ellipse(200, 150, 50, 50);
+      s.background(200); // Debug: Gray background
+      s.fill(255, 0, 0); // Debug: Red circle
+      s.ellipse(200, 150, 50, 50); // Debug: Test shape
+      console.log('p5.js setup completed, canvas size:', s.width, s.height);
       const rgb = hexToRGB(themeColor);
       s.stroke(...rgb);
       if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
-        console.log('Drawing lines with:', { traumaDiff: data.traumaDiff, valueDiff: data.valueDiff });
-        s.line(50, 300 - data.traumaDiff * 10, 50, 300);
-        s.line(350, 300 - data.valueDiff * 10, 350, 300);
+        const traumaY = 300 - data.traumaDiff * 10;
+        const valueY = 300 - data.valueDiff * 10;
+        console.log('Drawing lines:', { traumaY, valueY });
+        s.line(50, traumaY, 50, 300);
+        s.line(350, valueY, 350, 300);
       } else {
         console.error('Invalid data for Vertical Lines:', data);
       }
@@ -198,6 +207,7 @@ function renderLinesView(data) {
       s.text('Other', 340, 320);
       console.log('Vertical Lines rendered with data:', JSON.stringify(data));
     };
+    s.draw = () => {}; // Empty draw to keep sketch alive
   }, chartCanvas);
   return sketch;
 }
@@ -320,7 +330,7 @@ document.getElementById('random-code').addEventListener('click', () => {
   document.getElementById('code2').value = generateCode(randomResponses);
 });
 
-let currentSketch = null; // Store the current sketch to manage instances
+let currentSketch = null;
 
 document.getElementById('compare-codes').addEventListener('click', () => {
   const code1 = document.getElementById('code1').value;
@@ -336,17 +346,14 @@ document.getElementById('compare-codes').addEventListener('click', () => {
         <p><strong>Disconnects:</strong> ${result.disconnects}</p>
         <p><strong>Caveats:</strong> ${result.caveats}</p>
       `;
-      // Clean up previous sketch if it exists
       if (currentSketch) {
         currentSketch.remove();
         currentSketch = null;
       }
-      // Initial render
       setTimeout(() => {
         currentSketch = renderBarChart(result);
         console.log('Initial Bar Chart render triggered');
       }, 0);
-      // Remove existing listeners to prevent duplicates
       const barView = document.getElementById('bar-view');
       const vennView = document.getElementById('venn-view');
       const linesView = document.getElementById('lines-view');
@@ -359,23 +366,16 @@ document.getElementById('compare-codes').addEventListener('click', () => {
       vennView.replaceWith(vennClone);
       linesView.replaceWith(linesClone);
       printReport.replaceWith(printClone);
-      // Add new listeners
       barClone.addEventListener('click', () => {
-        if (currentSketch) {
-          currentSketch.remove();
-        }
+        if (currentSketch) currentSketch.remove();
         currentSketch = renderBarChart(result);
       });
       vennClone.addEventListener('click', () => {
-        if (currentSketch) {
-          currentSketch.remove();
-        }
+        if (currentSketch) currentSketch.remove();
         currentSketch = renderVennDiagram(result);
       });
       linesClone.addEventListener('click', () => {
-        if (currentSketch) {
-          currentSketch.remove();
-        }
+        if (currentSketch) currentSketch.remove();
         currentSketch = renderLinesView(result);
       });
       printClone.addEventListener('click', () => generateReport(code1, code2, result));
