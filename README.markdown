@@ -1,90 +1,77 @@
 # LinkCipher
 
-LinkCipher is a web-based app that helps users discover compatibility in relationships—whether romantic, professional, familial, or otherwise—through a unique, privacy-focused approach. By taking an adaptive survey, users generate a cryptic, time-stamped code that encapsulates their core values and life experiences. Share this code with another person to reveal links, disconnects, and caveats, presented in engaging visualizations like bar charts, Venn diagrams, or vertical lines. No data is stored, ensuring complete privacy.
-
-**Tagline**: Discover the core that shapes our lives
+LinkCipher is a web-based compatibility analysis tool designed to help individuals explore the alignment of their experiences and values with others, such as in romantic, friendship, family, or professional relationships. Using a survey-based approach, it generates unique codes that encode Trauma and Values scores, which can then be compared to assess compatibility.
 
 ## Features
-
-- **Adaptive Survey**: Answer 10–20 questions on a 1–5 scale, covering life experiences (e.g., loss, financial background) and values (e.g., trust, empathy). Questions adapt based on your responses for a tailored experience.
-- **Cryptic Code**: Generate a unique, time-stamped code (e.g., “X7B4-Z9C2”) that hides your answers, preserving privacy while enabling secure sharing.
-- **Compatibility Insights**: Compare two codes to get a narrative summary of links (shared strengths), disconnects (potential differences), and caveats (areas needing discussion), customized for relationship types like romantic partner or business colleague.
-- **Dynamic Visuals**: View results as a bar chart, Venn diagram, or vertical lines, with a toggle to switch between formats for intuitive understanding.
-- **Printable Report**: Generate a professional HTML report with the “Print Talking Points” button, summarizing results for therapists or mediators.
-- **Personalization**: Choose a theme color (default: Mariner Blue) to customize the interface.
-- **Dark Mode**: Toggle between light and dark themes via the footer for a comfortable experience.
-- **Robust Code Validation**: Ensures valid code formats with clear error messages on the compare screen.
-- **Privacy-First**: All processing is client-side; no data is stored or transmitted.
-- **Random Code Option**: Test the app by generating a random code for comparison without needing a second user.
-- **GitHub Link**: Access more app information via the “More App Info” link in the footer.
-- **Custom Logo**: Features the title “LinkCipher” with `logo.png` (scaled to 50px height, opacity 0.3) layered behind it in the header.
-
-## Benefits
-
-- **Build Stronger Connections**: Understand compatibility in any relationship, from roommates to mentors, with insights tailored to your context.
-- **Navigate Differences**: Identify potential challenges and receive empathetic advice to foster communication and understanding.
-- **Private and Secure**: Share codes confidently, knowing your personal data is never stored or exposed.
-- **Engaging Experience**: A sleek interface with dynamic visuals, professional reports, and a custom logo makes exploring compatibility intuitive and actionable.
+- **Survey System**: Answer a series of questions to generate a personalized compatibility code.
+- **Code Comparison**: Enter two codes to compare compatibility, with insights into Links, Disconnects, and Caveats.
+- **Visualizations**: View compatibility data through Bar Charts, Radar Charts, and Vertical Lines visualizations.
+- **Detailed Analysis**: Provides a breakdown of individual Trauma and Values scores (available for Person 1 if surveyed).
+- **Customizable Themes**: Adjust the theme color and toggle between light and dark modes.
+- **Printable Reports**: Generate a detailed HTML report with visualizations and discussion points.
 
 ## Installation
 
-1. **Clone or Download**:
+1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/linkcipher.git
+   git clone https://github.com/yourusername/linkcipher.git
+   cd linkcipher
    ```
-   Or download the ZIP from the repository.
 
-2. **File Structure**:
-   - `index.html`: Main page with home, survey, code entry, and results screens.
-   - `styles.css`: Custom styles for a sleek, responsive interface.
-   - `data.js`: Question sets and relationship weights.
-   - `script.js`: Logic for survey, code generation, visualizations, and report generation.
-   - `logo.png`: Custom logo file for the header.
+2. **Ensure Dependencies**:
+   - The project uses Chart.js for visualizations and Tailwind CSS for styling, both loaded via CDN.
+   - No additional server setup is required; it runs as a static web application.
 
-3. **Dependencies**:
-   - Uses [Tailwind CSS](https://cdn.tailwindcss.com) for styling (loaded via CDN).
-   - Uses [p5.js](https://p5js.org) for visualizations (loaded via CDN).
+3. **Prepare Files**:
+   - Ensure `index.html`, `script.js`, `styles.css`, `data.js`, and `logo.png` are in the root directory.
+   - Verify that `data.js` contains the survey questions array.
 
-4. **Run Locally**:
-   - Save all files (`index.html`, `styles.css`, `data.js`, `script.js`, `logo.png`) in a local directory.
-   - Open `index.html` in a modern browser (e.g., Chrome, Firefox).
-   - No server required, as all logic is client-side.
+4. **Open in Browser**:
+   - Double-click `index.html` or serve it via a local web server (e.g., using Python's `http.server`):
+     ```bash
+     python -m http.server 8000
+     ```
+   - Navigate to `http://localhost:8000` in your browser.
 
 ## Usage
 
-1. **Home Screen**: Choose “Take Survey” to create your code or “Enter Codes” to compare two codes.
-2. **Survey**: Select a relationship type (e.g., romantic, business), choose a theme color, and answer questions on a 1–5 scale. Skip any question if preferred.
-3. **Code Generation**: After the survey, get a unique, time-stamped code (e.g., “K8P3-M4V7”).
-4. **Comparison**: Enter your code and another’s (or use “Random Code” for testing). View a summary with links, disconnects, and caveats, plus visualizations (toggle between bar chart, Venn diagram, or vertical lines).
-5. **Printable Report**: On the results screen, click “Print Talking Points” to download an HTML report summarizing the comparison for use with a therapist or mediator.
-6. **Customize**: Toggle dark mode or change the theme color to personalize the interface.
+### 1. Start the Survey
+- Click "Start Survey" on the welcome screen.
+- Answer each question with a score from 1 to 5, or skip to use the default score of 3.
+- Complete the survey to generate your unique code.
 
-## Troubleshooting
+### 2. Enter Codes
+- Click "Enter Codes" on the welcome screen.
+- Input your code (generated from the survey) and another person's code (manually entered or randomly generated).
+- Click "Compare" to see the results.
 
-- **Console Errors from Extensions**: Messages like `[MindStudio][Content] Initializing content script` come from browser extensions (e.g., MindStudio). These don’t affect LinkCipher’s functionality. Disable extensions via `chrome://extensions/` (Chrome) or `about:addons` (Firefox) for a cleaner console.
-- **Favicon Errors**: If you see errors like `GET https://via.placeholder.com/32 net::ERR_TUNNEL_CONNECTION_FAILED`, ensure `index.html` uses the data URI favicon (`<link rel="icon" href="data:image/png;base64,...">`). Clear browser cache:
-  - Chrome: Press `Ctrl+Shift+Delete`, select “Cached images and files,” and clear.
-  - Firefox: Go to `about:preferences#privacy`, clear cache under “Cookies and Site Data.”
-  - Use incognito mode to bypass cache.
-- **Logo Issues**: If `logo.png` doesn’t display, ensure it’s in the root directory and a valid PNG file. Adjust the `.logo-title` (50px height, opacity 0.3) CSS in `<style>` if visibility is off.
-- **Visualization Errors**: If visualizations (e.g., Venn diagram) fail, ensure `themeColor` is a valid hex code (e.g., `#2E6DB4`) and p5.js is loaded via CDN.
-- **Report Issues**: If the “Print Talking Points” report doesn’t generate, ensure JavaScript is enabled and `script.js` includes the `generateReport` function.
+### 3. View Results
+- Explore the compatibility summary (Links, Disconnects, Caveats) with breakdowns for Finances, Health, and Measurables.
+- Switch between Bar Chart, Radar Chart, and Vertical Lines visualizations to analyze the data.
+- Click "Print Talking Points" to download a detailed HTML report.
+
+### 4. Customize Experience
+- Select a relationship type (Romantic, Friendship, Family, Professional) to tailor the analysis.
+- Change the theme color using the color picker.
+- Toggle between light and dark modes.
+
+## Project Structure
+- `index.html`: Main HTML file with the user interface.
+- `script.js`: JavaScript logic for survey, code generation, comparison, and report generation.
+- `styles.css`: Custom CSS for additional styling (optional, as Tailwind is used).
+- `data.js`: Contains the survey questions array.
+- `logo.png`: Project logo (replace with your own if needed).
+
+## Enhancements
+- **Detailed Analysis**: The report now includes tables breaking down Person 1's Trauma and Values scores by individual question responses (if surveyed). Person 2's detailed breakdown is unavailable unless their survey data is provided.
+- **Radar Chart**: Replaced the Venn Diagram with a Radar Chart for better comparison of Trauma and Values scores between individuals.
+- **Improved Report**: The printable report now features a "Detailed Analysis of Scores" section and updated visualizations.
 
 ## Contributing
-
-We welcome contributions! To contribute:
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-name`).
-3. Make changes and commit (`git commit -m "Add feature"`).
-4. Push to your branch (`git push origin feature-name`).
-5. Open a pull request.
+Contributions are welcome! Please fork the repository, make your changes, and submit a pull request. Ensure your code adheres to the existing style and includes tests if applicable.
 
 ## License
-
-MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
-
-For questions or feedback, open an issue on GitHub or reach out to the project maintainers.
-
-© 2025 LinkCipher. All rights reserved.
+For questions or support, please open an issue on the GitHub repository or contact the project maintainer at [your-email@example.com](mailto:your-email@example.com).
