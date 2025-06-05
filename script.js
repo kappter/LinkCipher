@@ -96,9 +96,18 @@ function renderBarChart(data) {
     console.error('p5.js is not loaded');
     return;
   }
+  // Fallback: Test native canvas drawing
+  const ctx = chartCanvas.getContext('2d');
+  if (ctx) {
+    ctx.fillStyle = 'green';
+    ctx.fillRect(10, 10, 50, 50); // Debug: Green square
+    console.log('Native canvas drawing test completed');
+  } else {
+    console.error('Failed to get 2D context for canvas');
+  }
   const sketch = new p5(s => {
     s.setup = () => {
-      s.createCanvas(400, 300).parent('chart');
+      s.createCanvas(400, 300, s.P2D).parent('chart'); // Force 2D context
       s.background(200); // Debug: Gray background
       s.fill(255, 0, 0); // Debug: Red circle
       s.ellipse(200, 150, 50, 50); // Debug: Test shape
@@ -157,9 +166,17 @@ function renderVennDiagram(data) {
     console.error('p5.js is not loaded');
     return;
   }
+  const ctx = chartCanvas.getContext('2d');
+  if (ctx) {
+    ctx.fillStyle = 'green';
+    ctx.fillRect(10, 10, 50, 50); // Debug: Green square
+    console.log('Native canvas drawing test completed');
+  } else {
+    console.error('Failed to get 2D context for canvas');
+  }
   const sketch = new p5(s => {
     s.setup = () => {
-      s.createCanvas(400, 300).parent('chart');
+      s.createCanvas(400, 300, s.P2D).parent('chart');
       s.background(200); // Debug: Gray background
       s.fill(255, 0, 0); // Debug: Red circle
       s.ellipse(200, 150, 50, 50); // Debug: Test shape
@@ -211,9 +228,17 @@ function renderLinesView(data) {
     console.error('p5.js is not loaded');
     return;
   }
+  const ctx = chartCanvas.getContext('2d');
+  if (ctx) {
+    ctx.fillStyle = 'green';
+    ctx.fillRect(10, 10, 50, 50); // Debug: Green square
+    console.log('Native canvas drawing test completed');
+  } else {
+    console.error('Failed to get 2D context for canvas');
+  }
   const sketch = new p5(s => {
     s.setup = () => {
-      s.createCanvas(400, 300).parent('chart');
+      s.createCanvas(400, 300, s.P2D).parent('chart');
       s.background(200); // Debug: Gray background
       s.fill(255, 0, 0); // Debug: Red circle
       s.ellipse(200, 150, 50, 50); // Debug: Test shape
@@ -394,10 +419,11 @@ document.getElementById('compare-codes').addEventListener('click', () => {
         currentSketch.remove();
         currentSketch = null;
       }
+      // Delay to ensure DOM is ready
       setTimeout(() => {
         currentSketch = renderBarChart(result);
         console.log('Initial Bar Chart render triggered');
-      }, 0);
+      }, 100);
       const barView = document.getElementById('bar-view');
       const vennView = document.getElementById('venn-view');
       const linesView = document.getElementById('lines-view');
@@ -412,15 +438,21 @@ document.getElementById('compare-codes').addEventListener('click', () => {
       printReport.replaceWith(printClone);
       barClone.addEventListener('click', () => {
         if (currentSketch) currentSketch.remove();
-        currentSketch = renderBarChart(result);
+        setTimeout(() => {
+          currentSketch = renderBarChart(result);
+        }, 100);
       });
       vennClone.addEventListener('click', () => {
         if (currentSketch) currentSketch.remove();
-        currentSketch = renderVennDiagram(result);
+        setTimeout(() => {
+          currentSketch = renderVennDiagram(result);
+        }, 100);
       });
       linesClone.addEventListener('click', () => {
         if (currentSketch) currentSketch.remove();
-        currentSketch = renderLinesView(result);
+        setTimeout(() => {
+          currentSketch = renderLinesView(result);
+        }, 100);
       });
       printClone.addEventListener('click', () => generateReport(code1, code2, result));
     } catch (e) {
