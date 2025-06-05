@@ -618,9 +618,13 @@ document.getElementById('skip-question').addEventListener('click', () => {
 });
 
 document.getElementById('random-code').addEventListener('click', () => {
-  const randomResponses = {};
-  questions.forEach(q => randomResponses[q.id] = Math.floor(Math.random() * 5) + 1);
-  document.getElementById('code2').value = generateCode(randomResponses);
+  const traumaKeys = ['violence', 'divorce', 'neglect', 'illness', 'money', 'estrangement', 'addiction', 'death'];
+  const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
+  responses = {};
+  traumaKeys.forEach(key => responses[key] = Math.floor(Math.random() * 5) + 1);
+  valueKeys.forEach(key => responses[key] = Math.floor(Math.random() * 5) + 1);
+  userCode = generateCode(responses);
+  document.getElementById('code1').value = userCode;
 });
 
 let currentChart = null;
