@@ -65,7 +65,8 @@ function compareCodes(code1, code2) {
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
     console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
-    return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2 };
+    const person1Responses = code1 === userCode ? responses : null;
+    return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
   }
@@ -143,24 +144,67 @@ function renderBarChart(data) {
   return chart;
 }
 
-function renderVennDiagram(data) {
+function renderRadarChart(data) {
   const canvas = document.getElementById('visualization');
-  console.log('Visualization element for Venn Diagram:', canvas);
+  console.log('Visualization element for Radar Chart:', canvas);
   if (!canvas) {
     console.error('Visualization div not found');
     return;
   }
+  canvas.innerHTML = '<canvas id="chart"></canvas>';
+  const chartCanvas = document.getElementById('chart');
+  console.log('Chart canvas element:', chartCanvas);
+  if (!chartCanvas) {
+    console.error('Chart canvas not found after creation');
+    return;
+  }
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js is not loaded');
+    return;
+  }
   const rgb = hexToRGB(themeColor);
+  const backgroundColor = document.body.classList.contains('dark-mode') ? '#333' : '#fff';
   const textColor = document.body.classList.contains('dark-mode') ? '#ccc' : '#333';
-  canvas.innerHTML = `
-    <div class="venn-container">
-      <div class="venn-circle venn-left" style="border-color: rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]});"></div>
-      <div class="venn-circle venn-right" style="border-color: rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]});"></div>
-      <div class="venn-overlap" style="color: ${textColor};">Overlap</div>
-    </div>
-  `;
-  console.log('Venn Diagram rendered with data:', JSON.stringify(data));
-  return null;
+  const chart = new Chart(chartCanvas, {
+    type: 'radar',
+    data: {
+      labels: ['Trauma', 'Values'],
+      datasets: [
+        {
+          label: 'Person 1',
+          data: [data.t1, data.v1],
+          backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.2)`,
+          borderColor: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`,
+          borderWidth: 1
+        },
+        {
+          label: 'Person 2',
+          data: [data.t2, data.v2],
+          backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.1)`,
+          borderColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.5)`,
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 50,
+          ticks: { color: textColor, stepSize: 10 },
+          grid: { color: textColor },
+          angleLines: { color: textColor },
+          pointLabels: { color: textColor }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: textColor } }
+      },
+      backgroundColor: backgroundColor
+    }
+  });
+  console.log('Radar Chart rendered with data:', JSON.stringify(data));
+  return chart;
 }
 
 function renderLinesView(data) {
@@ -235,11 +279,29 @@ function generateReport(code1, code2, result) {
   const formattedDateTime = now.toLocaleString();
   const relationship = document.getElementById('relationship-select').value || selectedRelationship;
   
-  // Calculate financial and health implications based on trauma and value differences
   const financialImpact = result.traumaDiff > 10 ? 'Potential misalignment in financial priorities due to differing life experiences.' : 'Likely alignment in financial priorities.';
   const healthImpact = result.valueDiff > 10 ? 'Differences in values may affect health-related decisions or stress levels.' : 'Shared values support aligned health decisions.';
   
-  // Prepare the report content with detailed breakdowns
+  const traumaKeys = ['violence', 'divorce', 'neglect', 'illness', 'money', 'estrangement', 'addiction', 'death'];
+  const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
+  let person1TraumaBreakdown = '';
+  let person1ValuesBreakdown = '';
+  if (result.person1Responses) {
+    person1TraumaBreakdown = traumaKeys.map(key => {
+      const score = result.person1Responses[key] || 3;
+      const question = questions.find(q => q.id === key)?.text || key;
+      return `<tr><td>${question}</td><td>${score}</td></tr>`;
+    }).join('');
+    person1ValuesBreakdown = valueKeys.map(key => {
+      const score = result.person1Responses[key] || 3;
+      const question = questions.find(q => q.id === key)?.text || key;
+      return `<tr><td>${question}</td><td>${score}</td></tr>`;
+    }).join('');
+  } else {
+    person1TraumaBreakdown = '<tr><td colspan="2">Detailed responses not available.</td></tr>';
+    person1ValuesBreakdown = '<tr><td colspan="2">Detailed responses not available.</td></tr>';
+  }
+
   const reportContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -256,14 +318,10 @@ function generateReport(code1, code2, result) {
         }
         body { font-family: Arial, sans-serif; }
         .header { background-color: ${themeColor}; }
-        .venn-container { position: relative; width: 400px; height: 300px; margin: auto; }
-        .venn-circle { position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 2px solid; }
-        .venn-left { left: 50px; top: 50px; }
-        .venn-right { right: 50px; top: 50px; }
-        .venn-overlap { position: absolute; top: 140px; left: 175px; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
+        canvas { max-width: 400px; margin: auto; display: block; }
       </style>
     </head>
     <body class="bg-gray-100">
@@ -306,15 +364,40 @@ function generateReport(code1, code2, result) {
           </ul>
         </section>
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
+          <h2 class="text-xl font-semibold mb-2">Detailed Analysis of Scores</h2>
+          <h3 class="text-lg font-medium">Person 1 Trauma Breakdown</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${person1TraumaBreakdown}
+            </tbody>
+          </table>
+          <h3 class="text-lg font-medium mt-4">Person 1 Values Breakdown</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${person1ValuesBreakdown}
+            </tbody>
+          </table>
+          <h3 class="text-lg font-medium mt-4">Person 2 Breakdown</h3>
+          <p>Detailed breakdown for Person 2 is not available as individual responses were not provided. Total scores: Trauma (${result.t2}), Values (${result.v2}).</p>
+        </section>
+        <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
           <h2 class="text-xl font-semibold mb-2">Visualizations</h2>
           <h3 class="text-lg font-medium">Bar Chart</h3>
           <canvas id="bar-chart" width="400" height="300"></canvas>
-          <h3 class="text-lg font-medium mt-4">Venn Diagram</h3>
-          <div class="venn-container">
-            <div class="venn-circle venn-left" style="border-color: ${themeColor};"></div>
-            <div class="venn-circle venn-right" style="border-color: ${themeColor};"></div>
-            <div class="venn-overlap">Overlap</div>
-          </div>
+          <h3 class="text-lg font-medium mt-4">Radar Chart</h3>
+          <canvas id="radar-chart" width="400" height="300"></canvas>
           <h3 class="text-lg font-medium mt-4">Vertical Lines</h3>
           <canvas id="lines-chart" width="400" height="300"></canvas>
           <h3 class="text-lg font-medium mt-4">Points Breakdown</h3>
@@ -381,6 +464,38 @@ function generateReport(code1, code2, result) {
             }
           }
         });
+        // Render Radar Chart
+        const radarChart = new Chart(document.getElementById('radar-chart'), {
+          type: 'radar',
+          data: {
+            labels: ['Trauma', 'Values'],
+            datasets: [
+              {
+                label: 'Person 1',
+                data: [${result.t1}, ${result.v1}],
+                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.2)',
+                borderColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
+                borderWidth: 1
+              },
+              {
+                label: 'Person 2',
+                data: [${result.t2}, ${result.v2}],
+                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.1)',
+                borderColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.5)',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 50,
+                ticks: { stepSize: 10 }
+              }
+            }
+          }
+        });
         // Render Lines Chart
         const linesChart = new Chart(document.getElementById('lines-chart'), {
           type: 'line',
@@ -437,6 +552,8 @@ function toggleDarkMode() {
     setTimeout(() => {
       if (currentView === 'bar') {
         currentChart = renderBarChart(data);
+      } else if (currentView === 'radar') {
+        currentChart = renderRadarChart(data);
       } else if (currentView === 'lines') {
         currentChart = renderLinesView(data);
       }
@@ -538,9 +655,9 @@ document.getElementById('compare-codes').addEventListener('click', () => {
       });
       vennClone.addEventListener('click', () => {
         if (currentChart) currentChart.destroy();
-        currentView = 'venn';
+        currentView = 'radar';
         setTimeout(() => {
-          currentChart = renderVennDiagram(result);
+          currentChart = renderRadarChart(result);
         }, 100);
       });
       linesClone.addEventListener('click', () => {
@@ -580,8 +697,8 @@ document.getElementById('theme-color').addEventListener('change', (e) => {
     setTimeout(() => {
       if (currentView === 'bar') {
         currentChart = renderBarChart(data);
-      } else if (currentView === 'venn') {
-        currentChart = renderVennDiagram(data);
+      } else if (currentView === 'radar') {
+        currentChart = renderRadarChart(data);
       } else if (currentView === 'lines') {
         currentChart = renderLinesView(data);
       }
