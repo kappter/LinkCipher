@@ -119,7 +119,22 @@ function renderBarChart(data) {
       s.text('Values', 150, 220);
       console.log('Bar Chart rendered with data:', JSON.stringify(data));
     };
-    s.draw = () => {}; // Empty draw to keep sketch alive
+    s.draw = () => {
+      s.background(200); // Refresh background
+      s.fill(255, 0, 0); // Red circle
+      s.ellipse(200, 150, 50, 50); // Ensure circle persists
+      const rgb = hexToRGB(themeColor);
+      s.fill(...rgb);
+      if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
+        const traumaY = 200 - data.traumaDiff * 5;
+        const valueY = 200 - data.valueDiff * 5;
+        s.rect(50, traumaY, 80, data.traumaDiff * 5);
+        s.rect(150, valueY, 80, data.valueDiff * 5);
+      }
+      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
+      s.text('Trauma', 50, 220);
+      s.text('Values', 150, 220);
+    };
   }, chartCanvas);
   return sketch;
 }
@@ -160,7 +175,20 @@ function renderVennDiagram(data) {
       s.text('Overlap', 180, 150);
       console.log('Venn Diagram rendered with data:', JSON.stringify(data));
     };
-    s.draw = () => {}; // Empty draw to keep sketch alive
+    s.draw = () => {
+      s.background(200); // Refresh background
+      s.fill(255, 0, 0); // Red circle
+      s.ellipse(200, 150, 50, 50); // Ensure circle persists
+      const rgb = hexToRGB(themeColor);
+      s.noFill();
+      s.stroke(...rgb);
+      s.ellipse(150, 150, 100, 100);
+      s.ellipse(250, 150, 100, 100);
+      s.fill(150);
+      s.ellipse(200, 150, 100, 100);
+      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
+      s.text('Overlap', 180, 150);
+    };
   }, chartCanvas);
   return sketch;
 }
@@ -207,7 +235,23 @@ function renderLinesView(data) {
       s.text('Other', 340, 320);
       console.log('Vertical Lines rendered with data:', JSON.stringify(data));
     };
-    s.draw = () => {}; // Empty draw to keep sketch alive
+    s.draw = () => {
+      s.background(200); // Refresh background
+      s.fill(255, 0, 0); // Red circle
+      s.ellipse(200, 150, 50, 50); // Ensure circle persists
+      const rgb = hexToRGB(themeColor);
+      s.stroke(...rgb);
+      if (!isNaN(data.traumaDiff) && !isNaN(data.valueDiff)) {
+        const traumaY = 300 - data.traumaDiff * 10;
+        const valueY = 300 - data.valueDiff * 10;
+        s.line(50, traumaY, 50, 300);
+        s.line(350, valueY, 350, 300);
+      }
+      s.fill(document.body.classList.contains('dark-mode') ? 200 : 0);
+      s.text('You', 40, 320);
+      s.fill(document.body.classList.contains('dark-mode') ? 0 : 200);
+      s.text('Other', 340, 320);
+    };
   }, chartCanvas);
   return sketch;
 }
