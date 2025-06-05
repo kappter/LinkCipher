@@ -3,6 +3,7 @@ let responses = {};
 let userCode = null;
 let selectedRelationship = 'romantic';
 let themeColor = '#2E6DB4';
+let randomResponses2 = {};
 
 function showScreen(screenId) {
   document.querySelectorAll('#main-content > div').forEach(div => div.classList.add('hidden'));
@@ -66,7 +67,8 @@ function compareCodes(code1, code2) {
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
     console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
     const person1Responses = code1 === userCode ? responses : null;
-    return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses };
+    const person2Responses = code2 === userCode ? responses : randomResponses2;
+    return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses, person2Responses };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
   }
@@ -290,8 +292,9 @@ function generateReport(code1, code2, result) {
   if (result.person1Responses) {
     traumaComparison = traumaKeys.map(key => {
       const score1 = result.person1Responses[key] || 3;
+      const score2 = result.person2Responses[key] || 3;
       const question = questions.find(q => q.id === key)?.text || key;
-      return `<tr><td>${question}</td><td>${score1}</td><td>N/A</td></tr>`;
+      return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
     }).join('');
     // Add a totals row
     traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
@@ -305,8 +308,9 @@ function generateReport(code1, code2, result) {
   if (result.person1Responses) {
     valuesComparison = valueKeys.map(key => {
       const score1 = result.person1Responses[key] || 3;
+      const score2 = result.person2Responses[key] || 3;
       const question = questions.find(q => q.id === key)?.text || key;
-      return `<tr><td>${question}</td><td>${score1}</td><td>N/A</td></tr>`;
+      return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
     }).join('');
     // Add a totals row
     valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
@@ -391,7 +395,6 @@ function generateReport(code1, code2, result) {
               ${traumaComparison}
             </tbody>
           </table>
-          <p class="mt-2 text-sm text-gray-600">Note: Person 2's individual scores are not available as only their total score was provided. A full side-by-side comparison requires both individuals' detailed survey responses.</p>
           <h3 class="text-lg font-medium mt-4">Values Comparison (Person 1 vs Person 2)</h3>
           <table>
             <thead>
@@ -405,7 +408,6 @@ function generateReport(code1, code2, result) {
               ${valuesComparison}
             </tbody>
           </table>
-          <p class="mt-2 text-sm text-gray-600">Note: Person 2's individual scores are not available as only their total score was provided.</p>
         </section>
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
           <h2 class="text-xl font-semibold mb-2">Visualizations</h2>
@@ -620,11 +622,20 @@ document.getElementById('skip-question').addEventListener('click', () => {
 document.getElementById('random-code').addEventListener('click', () => {
   const traumaKeys = ['violence', 'divorce', 'neglect', 'illness', 'money', 'estrangement', 'addiction', 'death'];
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
-  responses = {};
-  traumaKeys.forEach(key => responses[key] = Math.floor(Math.random() * 5) + 1);
-  valueKeys.forEach(key => responses[key] = Math.floor(Math.random() * 5) + 1);
-  userCode = generateCode(responses);
-  document.getElementById('code1').value = userCode;
+  const targetInput = document.activeElement === document.getElementById('code1') ? 'code1' : 'code2';
+  if (targetInput === 'code1') {
+    responses = {};
+    traumaKeys.forEach(key => responses[key] = Math.floor(Math.random() * 5) + 1);
+    valueKeys.forEach(key => responses[key] = Math.floor(Math.random() * 5) + 1);
+    userCode = generateCode(responses);
+    document.getElementById('code1').value = userCode;
+  } else {
+    randomResponses2 = {};
+    traumaKeys.forEach(key => randomResponses2[key] = Math.floor(Math.random() * 5) + 1);
+    valueKeys.forEach(key => randomResponses2[key] = Math.floor(Math.random() * 5) + 1);
+    const code2 = generateCode(randomResponses2);
+    document.getElementById('code2').value = code2;
+  }
 });
 
 let currentChart = null;
