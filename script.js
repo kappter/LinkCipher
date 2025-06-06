@@ -1,9 +1,9 @@
 let currentQuestionIndex = 0;
-let responses = {};
+let responses = { main: {}, followUps: {} }; // Separate main and follow-up responses
 let userCode = null;
 let selectedRelationship = 'romantic';
 let themeColor = '#2E6DB4';
-let randomResponses2 = {};
+let randomResponses2 = { main: {}, followUps: {} };
 
 function showScreen(screenId) {
   document.querySelectorAll('#main-content > div').forEach(div => div.classList.add('hidden'));
@@ -18,8 +18,9 @@ function showScreen(screenId) {
 function renderQuestion() {
   const question = questions[currentQuestionIndex];
   const container = document.getElementById('question-container');
+  const isFollowUp = question.id.includes('_followup');
   container.innerHTML = `
-    <p class="mb-4">${question.text}</p>
+    <p class="mb-4">${question.text}${isFollowUp ? ' <span class="text-sm text-gray-500">(Optional)</span>' : ''}</p>
     <div class="slider-container">
       <input type="range" id="answer-slider" name="answer" min="1" max="5" step="1" value="3" class="w-full">
       <div class="slider-markers">
@@ -38,11 +39,11 @@ function renderQuestion() {
   `;
 }
 
-function generateCode(responses) {
+function generateCode(responsesObj) {
   const traumaKeys = ['violence', 'divorce', 'neglect', 'illness', 'money', 'estrangement', 'addiction', 'death'];
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
-  const traumaSum = traumaKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
-  const valueSum = valueKeys.reduce((sum, key) => sum + (responses[key] || 3), 0);
+  const traumaSum = traumaKeys.reduce((sum, key) => sum + (responsesObj.main[key] || 3), 0);
+  const valueSum = valueKeys.reduce((sum, key) => sum + (responsesObj.main[key] || 3), 0);
   const now = new Date();
   const timestamp = `${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
   const traumaHex = traumaSum.toString(16).padStart(2, '0').toUpperCase();
@@ -74,9 +75,19 @@ function compareCodes(code1, code2) {
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
     console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
-    const person1Responses = Object.keys(responses).length ? responses : { ...randomResponses2 };
-    const person2Responses = Object.keys(randomResponses2).length ? randomResponses2 : { ...responses };
-    return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses, person2Responses };
+    const person1Responses = Object.keys(responses.main).length ? responses : { ...randomResponses2 };
+    const person2Responses = Object.keys(randomResponses2.main).length ? randomResponses2 : { ...responses };
+    // Compare follow-up responses
+    const followUpComparison = {};
+    const allFollowUpKeys = [...new Set([...Object.keys(person1Responses.followUps), ...Object.keys(person2Responses.followUps)])];
+    allFollowUpKeys.forEach(key => {
+      const score1 = person1Responses.followUps[key] || null;
+      const score2 = person2Responses.followUps[key] || null;
+      if (score1 !== null || score2 !== null) {
+        followUpComparison[key] = { score1, score2 };
+      }
+    });
+    return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses, person2Responses, followUpComparison };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
   }
@@ -378,21 +389,46 @@ function generateReport(code1, code2, result) {
 
   let traumaComparison = '';
   traumaComparison = (typeof questions !== 'undefined' ? traumaKeys.map(key => {
-    const score1 = result.person1Responses[key] || 3;
-    const score2 = result.person2Responses[key] || 3;
+    const score1 = result.person1Responses.main[key] || 3;
+    const score2 = result.person2Responses.main[key] || 3;
     const question = questions.find(q => q.id === key)?.text || key;
     return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
-  }).join('') : traumaKeys.map(key => `<tr><td>${key}</td><td>${result.person1Responses[key] || 3}</td><td>${result.person2Responses[key] || 3}</td></tr>`).join(''));
+  }).join('') : traumaKeys.map(key => `<tr><td>${key}</td><td>${result.person1Responses.main[key] || 3}</td><td>${result.person2Responses.main[key] || 3}</td></tr>`).join(''));
   traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
 
   let valuesComparison = '';
   valuesComparison = (typeof questions !== 'undefined' ? valueKeys.map(key => {
-    const score1 = result.person1Responses[key] || 3;
-    const score2 = result.person2Responses[key] || 3;
+    const score1 = result.person1Responses.main[key] || 3;
+    const score2 = result.person2Responses.main[key] || 3;
     const question = questions.find(q => q.id === key)?.text || key;
     return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
-  }).join('') : valueKeys.map(key => `<tr><td>${key}</td><td>${result.person1Responses[key] || 3}</td><td>${result.person2Responses[key] || 3}</td></tr>`).join(''));
+  }).join('') : valueKeys.map(key => `<tr><td>${key}</td><td>${result.person1Responses.main[key] || 3}</td><td>${result.person2Responses.main[key] || 3}</td></tr>`).join(''));
   valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
+
+  // Follow-up comparison
+  let followUpComparisonTable = '';
+  if (Object.keys(result.followUpComparison).length > 0) {
+    followUpComparisonTable = `
+      <h3 class="text-lg font-medium mt-4">Follow-Up Responses (Optional)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Follow-Up Question</th>
+            <th>Person 1 Score</th>
+            <th>Person 2 Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.keys(result.followUpComparison).map(key => {
+            const { score1, score2 } = result.followUpComparison[key];
+            const parentKey = key.replace('_followup', '');
+            const questionText = questions.find(q => q.id === parentKey)?.followUp?.text || key;
+            return `<tr><td>${questionText}</td><td>${score1 !== null ? score1 : 'N/A'}</td><td>${score2 !== null ? score2 : 'N/A'}</td></tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
 
   const reportContent = `
     <!DOCTYPE html>
@@ -510,6 +546,7 @@ function generateReport(code1, code2, result) {
               ${valuesComparison}
             </tbody>
           </table>
+          ${followUpComparisonTable}
         </section>
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
           <h2 class="text-xl font-semibold mb-2">Visualizations</h2>
@@ -729,9 +766,15 @@ document.getElementById('next-question').addEventListener('click', () => {
   const answer = document.getElementById('answer-slider');
   if (answer) {
     const question = questions[currentQuestionIndex];
-    responses[question.id] = parseInt(answer.value);
-    if (question.followUp && answer.value >= question.followUp.condition) {
-      questions.splice(currentQuestionIndex + 1, 0, { id: question.followUp.key, text: question.followUp.text, followUp: null });
+    const isFollowUp = question.id.includes('_followup');
+    if (isFollowUp) {
+      responses.followUps[question.id] = parseInt(answer.value);
+    } else {
+      responses.main[question.id] = parseInt(answer.value);
+      // Check for follow-up condition (4 or 5)
+      if (question.followUp && answer.value >= question.followUp.condition) {
+        questions.splice(currentQuestionIndex + 1, 0, { id: question.followUp.key, text: question.followUp.text, followUp: null });
+      }
     }
     currentQuestionIndex++;
     if (currentQuestionIndex < questions.length) {
@@ -745,14 +788,20 @@ document.getElementById('next-question').addEventListener('click', () => {
 });
 
 document.getElementById('skip-question').addEventListener('click', () => {
-  responses[questions[currentQuestionIndex].id] = 3;
+  const question = questions[currentQuestionIndex];
+  const isFollowUp = question.id.includes('_followup');
+  if (isFollowUp) {
+    responses.followUps[question.id] = null; // Skip follow-up
+  } else {
+    responses.main[question.id] = 3; // Default for main question
+  }
   currentQuestionIndex++;
   if (currentQuestionIndex < questions.length) {
-      renderQuestion();
+    renderQuestion();
   } else {
-      userCode = generateCode(responses);
-      showScreen('code-entry-screen');
-      document.getElementById('code1').value = userCode;
+    userCode = generateCode(responses);
+    showScreen('code-entry-screen');
+    document.getElementById('code1').value = userCode;
   }
 });
 
@@ -761,15 +810,43 @@ document.getElementById('random-code').addEventListener('click', () => {
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
   const targetInput = document.activeElement === document.getElementById('code1') ? 'code1' : 'code2';
   if (targetInput === 'code1') {
-    responses = {};
-    traumaKeys.forEach(key => responses[key] = Math.floor(Math.random() * 5) + 1);
-    valueKeys.forEach(key => responses[key] = Math.floor(Math.random() * 5) + 1);
+    responses = { main: {}, followUps: {} };
+    traumaKeys.forEach(key => {
+      const score = Math.floor(Math.random() * 5) + 1;
+      responses.main[key] = score;
+      if (score >= 4) {
+        const followUpKey = `${key}_followup`;
+        responses.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+      }
+    });
+    valueKeys.forEach(key => {
+      const score = Math.floor(Math.random() * 5) + 1;
+      responses.main[key] = score;
+      if (score >= 4) {
+        const followUpKey = `${key}_followup`;
+        responses.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+      }
+    });
     userCode = generateCode(responses);
     document.getElementById('code1').value = userCode;
   } else {
-    randomResponses2 = {};
-    traumaKeys.forEach(key => randomResponses2[key] = Math.floor(Math.random() * 5) + 1);
-    valueKeys.forEach(key => randomResponses2[key] = Math.floor(Math.random() * 5) + 1);
+    randomResponses2 = { main: {}, followUps: {} };
+    traumaKeys.forEach(key => {
+      const score = Math.floor(Math.random() * 5) + 1;
+      randomResponses2.main[key] = score;
+      if (score >= 4) {
+        const followUpKey = `${key}_followup`;
+        randomResponses2.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+      }
+    });
+    valueKeys.forEach(key => {
+      const score = Math.floor(Math.random() * 5) + 1;
+      randomResponses2.main[key] = score;
+      if (score >= 4) {
+        const followUpKey = `${key}_followup`;
+        randomResponses2.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+      }
+    });
     const code2 = generateCode(randomResponses2);
     document.getElementById('code2').value = code2;
   }
@@ -848,7 +925,7 @@ document.getElementById('compare-codes').addEventListener('click', () => {
   }
 });
 
-document.getElementById('relationship-select').addEventListener('change', (e) => {
+document.getElementById('relationship-select').addEventListener('click', (e) => {
   selectedRelationship = e.target.value;
 });
 
