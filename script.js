@@ -350,7 +350,7 @@ function renderClusteredComparison(data) {
         }
       },
       backgroundColor: backgroundColor,
-      indexAxis: 'y' // Horizontal bars for a "row" layout
+      indexAxis: 'y'
     }
   });
   console.log('Clustered Comparison rendered with data:', JSON.stringify(data));
@@ -401,7 +401,31 @@ function generateReport(code1, code2, result) {
           .no-print { display: none; }
         }
         body { font-family: Arial, sans-serif; }
-        .header { background-color: ${themeColor}; }
+        .header {
+          background-color: ${themeColor};
+          background-image: url('logo.png');
+          background-size: cover;
+          background-position: center;
+          position: relative;
+          color: white;
+          text-align: center;
+          padding: 20px 0;
+          height: 60px; /* Reduced height to save space */
+        }
+        .header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.4); /* Dark overlay for text readability */
+          z-index: 1;
+        }
+        .header-content {
+          position: relative;
+          z-index: 2;
+        }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
@@ -410,9 +434,11 @@ function generateReport(code1, code2, result) {
       </style>
     </head>
     <body class="bg-gray-100 min-h-screen flex flex-col">
-      <header class="header text-white text-center py-4">
-        <h1 class="text-2xl font-bold">LinkCipher Talking Points</h1>
-        <p class="subtitle">Generated on ${formattedDateTime}</p>
+      <header class="header">
+        <div class="header-content">
+          <h1 class="text-xl font-bold">LinkCipher Talking Points</h1>
+          <p class="text-sm">Generated on ${formattedDateTime}</p>
+        </div>
       </header>
       <main class="container mx-auto p-4 flex-grow">
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
