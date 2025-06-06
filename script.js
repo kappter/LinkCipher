@@ -66,8 +66,8 @@ function compareCodes(code1, code2) {
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
     console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
-    const person1Responses = code1 === userCode ? responses : null;
-    const person2Responses = code2 === userCode ? responses : randomResponses2;
+    const person1Responses = responses; // Always available from randomization or survey
+    const person2Responses = randomResponses2; // Always available from randomization
     return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses, person2Responses };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
@@ -146,9 +146,9 @@ function renderBarChart(data) {
   return chart;
 }
 
-function renderRadarChart(data) {
+function renderScatterChart(data) {
   const canvas = document.getElementById('visualization');
-  console.log('Visualization element for Radar Chart:', canvas);
+  console.log('Visualization element for Scatter Chart:', canvas);
   if (!canvas) {
     console.error('Visualization div not found');
     return;
@@ -168,35 +168,40 @@ function renderRadarChart(data) {
   const backgroundColor = document.body.classList.contains('dark-mode') ? '#333' : '#fff';
   const textColor = document.body.classList.contains('dark-mode') ? '#ccc' : '#333';
   const chart = new Chart(chartCanvas, {
-    type: 'radar',
+    type: 'scatter',
     data: {
-      labels: ['Trauma', 'Values'],
       datasets: [
         {
           label: 'Person 1',
-          data: [data.t1, data.v1],
-          backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.2)`,
+          data: [{ x: 'Trauma', y: data.t1 }, { x: 'Values', y: data.v1 }],
+          backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.7)`,
           borderColor: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`,
-          borderWidth: 1
+          borderWidth: 1,
+          pointRadius: 5
         },
         {
           label: 'Person 2',
-          data: [data.t2, data.v2],
-          backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.1)`,
-          borderColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.5)`,
-          borderWidth: 1
+          data: [{ x: 'Trauma', y: data.t2 }, { x: 'Values', y: data.v2 }],
+          backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.3)`,
+          borderColor: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`,
+          borderWidth: 1,
+          pointRadius: 5
         }
       ]
     },
     options: {
       scales: {
-        r: {
+        x: {
+          type: 'category',
+          labels: ['Trauma', 'Values'],
+          ticks: { color: textColor },
+          grid: { color: textColor }
+        },
+        y: {
           beginAtZero: true,
           max: 50,
-          ticks: { color: textColor, stepSize: 10 },
-          grid: { color: textColor },
-          angleLines: { color: textColor },
-          pointLabels: { color: textColor }
+          ticks: { color: textColor },
+          grid: { color: textColor }
         }
       },
       plugins: {
@@ -205,7 +210,7 @@ function renderRadarChart(data) {
       backgroundColor: backgroundColor
     }
   });
-  console.log('Radar Chart rendered with data:', JSON.stringify(data));
+  console.log('Scatter Chart rendered with data:', JSON.stringify(data));
   return chart;
 }
 
@@ -289,35 +294,25 @@ function generateReport(code1, code2, result) {
 
   // Side-by-side comparison for Trauma
   let traumaComparison = '';
-  if (result.person1Responses) {
-    traumaComparison = traumaKeys.map(key => {
-      const score1 = result.person1Responses[key] || 3;
-      const score2 = result.person2Responses[key] || 3;
-      const question = questions.find(q => q.id === key)?.text || key;
-      return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
-    }).join('');
-    // Add a totals row
-    traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
-  } else {
-    traumaComparison = `<tr><td colspan="3">Detailed responses for Person 1 not available.</td></tr>`;
-    traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
-  }
+  traumaComparison = traumaKeys.map(key => {
+    const score1 = result.person1Responses[key] || 3;
+    const score2 = result.person2Responses[key] || 3;
+    const question = questions.find(q => q.id === key)?.text || key;
+    return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
+  }).join('');
+  // Add a totals row
+  traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
 
   // Side-by-side comparison for Values
   let valuesComparison = '';
-  if (result.person1Responses) {
-    valuesComparison = valueKeys.map(key => {
-      const score1 = result.person1Responses[key] || 3;
-      const score2 = result.person2Responses[key] || 3;
-      const question = questions.find(q => q.id === key)?.text || key;
-      return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
-    }).join('');
-    // Add a totals row
-    valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
-  } else {
-    valuesComparison = `<tr><td colspan="3">Detailed responses for Person 1 not available.</td></tr>`;
-    valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
-  }
+  valuesComparison = valueKeys.map(key => {
+    const score1 = result.person1Responses[key] || 3;
+    const score2 = result.person2Responses[key] || 3;
+    const question = questions.find(q => q.id === key)?.text || key;
+    return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
+  }).join('');
+  // Add a totals row
+  valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
 
   const reportContent = `
     <!DOCTYPE html>
@@ -339,14 +334,15 @@ function generateReport(code1, code2, result) {
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
         canvas { max-width: 400px; margin: auto; display: block; }
+        .footer { position: fixed; bottom: 0; width: 100%; background-color: ${themeColor}; color: white; text-align: center; padding: 10px; font-size: 12px; }
       </style>
     </head>
-    <body class="bg-gray-100">
+    <body class="bg-gray-100 min-h-screen flex flex-col">
       <header class="header text-white text-center py-4">
         <h1 class="text-2xl font-bold">LinkCipher Talking Points</h1>
         <p class="subtitle">Generated on ${formattedDateTime}</p>
       </header>
-      <main class="container mx-auto p-4">
+      <main class="container mx-auto p-4 flex-grow">
         <section class="bg-white p-6 rounded-lg shadow-lg mb-4">
           <h2 class="text-xl font-semibold mb-2">Overview</h2>
           <p><strong>Relationship Type:</strong> ${relationship.charAt(0).toUpperCase() + relationship.slice(1)}</p>
@@ -413,8 +409,8 @@ function generateReport(code1, code2, result) {
           <h2 class="text-xl font-semibold mb-2">Visualizations</h2>
           <h3 class="text-lg font-medium">Bar Chart</h3>
           <canvas id="bar-chart" width="400" height="300"></canvas>
-          <h3 class="text-lg font-medium mt-4">Radar Chart</h3>
-          <canvas id="radar-chart" width="400" height="300"></canvas>
+          <h3 class="text-lg font-medium mt-4">Scatter Chart</h3>
+          <canvas id="scatter-chart" width="400" height="300"></canvas>
           <h3 class="text-lg font-medium mt-4">Vertical Lines</h3>
           <canvas id="lines-chart" width="400" height="300"></canvas>
           <h3 class="text-lg font-medium mt-4">Points Breakdown</h3>
@@ -449,6 +445,9 @@ function generateReport(code1, code2, result) {
           </ul>
         </section>
       </main>
+      <footer class="footer">
+        © 2025 Ken Kapptie | For educational use only | All rights reserved. More tools like this | Want your own?
+      </footer>
       <button class="no-print fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="window.print()">Print Report</button>
       <script>
         const rgb = [${hexToRGB(themeColor).join(', ')}];
@@ -481,35 +480,37 @@ function generateReport(code1, code2, result) {
             }
           }
         });
-        // Render Radar Chart
-        const radarChart = new Chart(document.getElementById('radar-chart'), {
-          type: 'radar',
+        // Render Scatter Chart
+        const scatterChart = new Chart(document.getElementById('scatter-chart'), {
+          type: 'scatter',
           data: {
-            labels: ['Trauma', 'Values'],
             datasets: [
               {
                 label: 'Person 1',
-                data: [${result.t1}, ${result.v1}],
-                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.2)',
+                data: [{ x: 'Trauma', y: ${result.t1} }, { x: 'Values', y: ${result.v1} }],
+                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.7)',
                 borderColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
-                borderWidth: 1
+                borderWidth: 1,
+                pointRadius: 5
               },
               {
                 label: 'Person 2',
-                data: [${result.t2}, ${result.v2}],
-                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.1)',
-                borderColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.5)',
-                borderWidth: 1
+                data: [{ x: 'Trauma', y: ${result.t2} }, { x: 'Values', y: ${result.v2} }],
+                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.3)',
+                borderColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
+                borderWidth: 1,
+                pointRadius: 5
               }
             ]
           },
           options: {
             scales: {
-              r: {
-                beginAtZero: true,
-                max: 50,
-                ticks: { stepSize: 10 }
-              }
+              x: {
+                type: 'category',
+                labels: ['Trauma', 'Values'],
+                ticks: {}
+              },
+              y: { beginAtZero: true, max: 50 }
             }
           }
         });
@@ -569,8 +570,8 @@ function toggleDarkMode() {
     setTimeout(() => {
       if (currentView === 'bar') {
         currentChart = renderBarChart(data);
-      } else if (currentView === 'radar') {
-        currentChart = renderRadarChart(data);
+      } else if (currentView === 'scatter') {
+        currentChart = renderScatterChart(data);
       } else if (currentView === 'lines') {
         currentChart = renderLinesView(data);
       }
@@ -665,15 +666,15 @@ document.getElementById('compare-codes').addEventListener('click', () => {
         console.log('Initial Bar Chart render triggered');
       }, 100);
       const barView = document.getElementById('bar-view');
-      const vennView = document.getElementById('venn-view');
+      const scatterView = document.getElementById('scatter-view');
       const linesView = document.getElementById('lines-view');
       const printReport = document.getElementById('print-report');
       const barClone = barView.cloneNode(true);
-      const vennClone = vennView.cloneNode(true);
+      const scatterClone = scatterView.cloneNode(true);
       const linesClone = linesView.cloneNode(true);
       const printClone = printReport.cloneNode(true);
       barView.replaceWith(barClone);
-      vennView.replaceWith(vennClone);
+      scatterView.replaceWith(scatterClone);
       linesView.replaceWith(linesClone);
       printReport.replaceWith(printClone);
       barClone.addEventListener('click', () => {
@@ -683,11 +684,11 @@ document.getElementById('compare-codes').addEventListener('click', () => {
           currentChart = renderBarChart(result);
         }, 100);
       });
-      vennClone.addEventListener('click', () => {
+      scatterClone.addEventListener('click', () => {
         if (currentChart) currentChart.destroy();
-        currentView = 'radar';
+        currentView = 'scatter';
         setTimeout(() => {
-          currentChart = renderRadarChart(result);
+          currentChart = renderScatterChart(result);
         }, 100);
       });
       linesClone.addEventListener('click', () => {
@@ -727,8 +728,8 @@ document.getElementById('theme-color').addEventListener('change', (e) => {
     setTimeout(() => {
       if (currentView === 'bar') {
         currentChart = renderBarChart(data);
-      } else if (currentView === 'radar') {
-        currentChart = renderRadarChart(data);
+      } else if (currentView === 'scatter') {
+        currentChart = renderScatterChart(data);
       } else if (currentView === 'lines') {
         currentChart = renderLinesView(data);
       }
