@@ -66,8 +66,8 @@ function compareCodes(code1, code2) {
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
     console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
-    const person1Responses = responses; // Always available from randomization or survey
-    const person2Responses = randomResponses2; // Always available from randomization
+    const person1Responses = Object.keys(responses).length ? responses : { ...randomResponses2 }; // Ensure person1Responses is always populated
+    const person2Responses = Object.keys(randomResponses2).length ? randomResponses2 : { ...responses }; // Ensure person2Responses is always populated
     return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses, person2Responses };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
@@ -669,36 +669,34 @@ document.getElementById('compare-codes').addEventListener('click', () => {
       const scatterView = document.getElementById('scatter-view');
       const linesView = document.getElementById('lines-view');
       const printReport = document.getElementById('print-report');
-      const barClone = barView.cloneNode(true);
-      const scatterClone = scatterView.cloneNode(true);
-      const linesClone = linesView.cloneNode(true);
-      const printClone = printReport.cloneNode(true);
-      barView.replaceWith(barClone);
-      scatterView.replaceWith(scatterClone);
-      linesView.replaceWith(linesClone);
-      printReport.replaceWith(printClone);
-      barClone.addEventListener('click', () => {
-        if (currentChart) currentChart.destroy();
-        currentView = 'bar';
-        setTimeout(() => {
+      if (barView && scatterView && linesView && printReport) {
+        const barClone = barView.cloneNode(true);
+        const scatterClone = scatterView.cloneNode(true);
+        const linesClone = linesView.cloneNode(true);
+        const printClone = printReport.cloneNode(true);
+        barView.parentNode.replaceChild(barClone, barView);
+        scatterView.parentNode.replaceChild(scatterClone, scatterView);
+        linesView.parentNode.replaceChild(linesClone, linesView);
+        printReport.parentNode.replaceChild(printClone, printReport);
+        barClone.addEventListener('click', () => {
+          if (currentChart) currentChart.destroy();
+          currentView = 'bar';
           currentChart = renderBarChart(result);
-        }, 100);
-      });
-      scatterClone.addEventListener('click', () => {
-        if (currentChart) currentChart.destroy();
-        currentView = 'scatter';
-        setTimeout(() => {
+        });
+        scatterClone.addEventListener('click', () => {
+          if (currentChart) currentChart.destroy();
+          currentView = 'scatter';
           currentChart = renderScatterChart(result);
-        }, 100);
-      });
-      linesClone.addEventListener('click', () => {
-        if (currentChart) currentChart.destroy();
-        currentView = 'lines';
-        setTimeout(() => {
+        });
+        linesClone.addEventListener('click', () => {
+          if (currentChart) currentChart.destroy();
+          currentView = 'lines';
           currentChart = renderLinesView(result);
-        }, 100);
-      });
-      printClone.addEventListener('click', () => generateReport(code1, code2, result));
+        });
+        printClone.addEventListener('click', () => generateReport(code1, code2, result));
+      } else {
+        console.error('One or more view elements not found');
+      }
     } catch (e) {
       errorDiv.classList.remove('hidden');
       errorDiv.textContent = e.message;
