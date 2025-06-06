@@ -281,6 +281,82 @@ function renderLinesView(data) {
   return chart;
 }
 
+function renderClusteredComparison(data) {
+  const canvas = document.getElementById('visualization');
+  console.log('Visualization element for Clustered Comparison:', canvas);
+  if (!canvas) {
+    console.error('Visualization div not found');
+    return;
+  }
+  canvas.innerHTML = '<canvas id="chart" width="600" height="400"></canvas>';
+  const chartCanvas = document.getElementById('chart');
+  console.log('Chart canvas element:', chartCanvas);
+  if (!chartCanvas) {
+    console.error('Chart canvas not found after creation');
+    return;
+  }
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js is not loaded');
+    return;
+  }
+  const rgb = hexToRGB(themeColor);
+  const backgroundColor = document.body.classList.contains('dark-mode') ? '#333' : '#fff';
+  const textColor = document.body.classList.contains('dark-mode') ? '#ccc' : '#333';
+  const chart = new Chart(chartCanvas, {
+    type: 'bar',
+    data: {
+      labels: ['Trauma', 'Values'],
+      datasets: [
+        {
+          label: 'Person 1',
+          data: [data.t1, data.v1],
+          backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.7)`,
+          borderColor: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`,
+          borderWidth: 1
+        },
+        {
+          label: 'Person 2',
+          data: [data.t2, data.v2],
+          backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.3)`,
+          borderColor: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`,
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      scales: {
+        x: {
+          ticks: { color: textColor },
+          grid: { color: textColor }
+        },
+        y: {
+          beginAtZero: true,
+          max: 50,
+          ticks: { color: textColor },
+          grid: { color: textColor }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: textColor } },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (label) label += ': ';
+              label += context.raw;
+              return label;
+            }
+          }
+        }
+      },
+      backgroundColor: backgroundColor,
+      indexAxis: 'y' // Horizontal bars for a "row" layout
+    }
+  });
+  console.log('Clustered Comparison rendered with data:', JSON.stringify(data));
+  return chart;
+}
+
 function generateReport(code1, code2, result) {
   const now = new Date();
   const formattedDateTime = now.toLocaleString();
@@ -292,7 +368,6 @@ function generateReport(code1, code2, result) {
   const traumaKeys = ['violence', 'divorce', 'neglect', 'illness', 'money', 'estrangement', 'addiction', 'death'];
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
 
-  // Side-by-side comparison for Trauma
   let traumaComparison = '';
   traumaComparison = traumaKeys.map(key => {
     const score1 = result.person1Responses[key] || 3;
@@ -302,7 +377,6 @@ function generateReport(code1, code2, result) {
   }).join('');
   traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
 
-  // Side-by-side comparison for Values
   let valuesComparison = '';
   valuesComparison = valueKeys.map(key => {
     const score1 = result.person1Responses[key] || 3;
@@ -331,7 +405,7 @@ function generateReport(code1, code2, result) {
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
-        canvas { max-width: 400px; margin: auto; display: block; }
+        canvas { max-width: 600px; margin: auto; display: block; }
         .footer { position: fixed; bottom: 0; width: 100%; background-color: ${themeColor}; color: white; text-align: center; padding: 10px; font-size: 12px; }
       </style>
     </head>
@@ -411,6 +485,8 @@ function generateReport(code1, code2, result) {
           <canvas id="scatter-chart" width="400" height="300"></canvas>
           <h3 class="text-lg font-medium mt-4">Vertical Lines</h3>
           <canvas id="lines-chart" width="400" height="300"></canvas>
+          <h3 class="text-lg font-medium mt-4">Clustered Comparison</h3>
+          <canvas id="clustered-chart" width="600" height="400"></canvas>
           <h3 class="text-lg font-medium mt-4">Points Breakdown</h3>
           <table>
             <thead>
@@ -540,6 +616,35 @@ function generateReport(code1, code2, result) {
             }
           }
         });
+        const clusteredChart = new Chart(document.getElementById('clustered-chart'), {
+          type: 'bar',
+          data: {
+            labels: ['Trauma', 'Values'],
+            datasets: [
+              {
+                label: 'Person 1',
+                data: [${result.t1}, ${result.v1}],
+                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.7)',
+                borderColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
+                borderWidth: 1
+              },
+              {
+                label: 'Person 2',
+                data: [${result.t2}, ${result.v2}],
+                backgroundColor: 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.3)',
+                borderColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            scales: {
+              y: { beginAtZero: true, max: 50 },
+              x: {}
+            },
+            indexAxis: 'y'
+          }
+        });
       </script>
     </body>
     </html>
@@ -569,6 +674,8 @@ function toggleDarkMode() {
         currentChart = renderScatterChart(data);
       } else if (currentView === 'lines') {
         currentChart = renderLinesView(data);
+      } else if (currentView === 'clustered') {
+        currentChart = renderClusteredComparison(data);
       }
     }, 100);
   }
@@ -675,6 +782,11 @@ document.getElementById('compare-codes').addEventListener('click', () => {
           currentView = 'lines';
           currentChart = renderLinesView(result);
         },
+        'clustered-view': () => {
+          if (currentChart) currentChart.destroy();
+          currentView = 'clustered';
+          currentChart = renderClusteredComparison(result);
+        },
         'print-report': () => generateReport(code1, code2, result)
       };
 
@@ -702,7 +814,7 @@ document.getElementById('compare-codes').addEventListener('click', () => {
   }
 });
 
-document.getElementById('relationship-select').addEventListener('click', (e) => {
+document.getElementById('relationship-select').addEventListener('change', (e) => {
   selectedRelationship = e.target.value;
 });
 
@@ -725,6 +837,8 @@ document.getElementById('theme-color').addEventListener('change', (e) => {
         currentChart = renderScatterChart(data);
       } else if (currentView === 'lines') {
         currentChart = renderLinesView(data);
+      } else if (currentView === 'clustered') {
+        currentChart = renderClusteredComparison(data);
       }
     }, 100);
   }
