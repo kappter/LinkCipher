@@ -20,12 +20,20 @@ function renderQuestion() {
   const container = document.getElementById('question-container');
   container.innerHTML = `
     <p class="mb-4">${question.text}</p>
-    <div class="flex justify-between">
-      ${[1, 2, 3, 4, 5].map(i => `
-        <label class="spectrum-radio">
-          <input type="radio" name="answer" value="${i}" class="mr-2">${i}
-        </label>
-      `).join('')}
+    <div class="slider-container">
+      <input type="range" id="answer-slider" name="answer" min="1" max="5" step="1" value="3" class="w-full">
+      <div class="slider-markers">
+        <div class="slider-marker left"></div>
+        <div class="slider-marker middle"></div>
+        <div class="slider-marker right"></div>
+      </div>
+      <div class="slider-labels">
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+      </div>
     </div>
   `;
 }
@@ -410,7 +418,7 @@ function generateReport(code1, code2, result) {
           color: white;
           text-align: center;
           padding: 20px 0;
-          height: 60px; /* Reduced height to save space */
+          height: 60px;
         }
         .header::before {
           content: '';
@@ -419,7 +427,7 @@ function generateReport(code1, code2, result) {
           left: 0;
           width: 100%;
           height: 100%;
-          background-color: rgba(0, 0, 0, 0.4); /* Dark overlay for text readability */
+          background-color: rgba(0, 0, 0, 0.4);
           z-index: 1;
         }
         .header-content {
@@ -546,7 +554,7 @@ function generateReport(code1, code2, result) {
         </section>
       </main>
       <footer class="footer">
-        © 2025 Ken Kapptie | For educational use only | All rights reserved. More tools like this | Want your own?
+        © 2025 Ken Kapptie | For educational use only | All rights reserved | More tools like this
       </footer>
       <button class="no-print fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="window.print()">Print Report</button>
       <script>
@@ -718,7 +726,7 @@ document.getElementById('enter-codes').addEventListener('click', () => {
 });
 
 document.getElementById('next-question').addEventListener('click', () => {
-  const answer = document.querySelector('input[name="answer"]:checked');
+  const answer = document.getElementById('answer-slider');
   if (answer) {
     const question = questions[currentQuestionIndex];
     responses[question.id] = parseInt(answer.value);
