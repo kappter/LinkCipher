@@ -66,8 +66,8 @@ function compareCodes(code1, code2) {
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
     console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
-    const person1Responses = Object.keys(responses).length ? responses : { ...randomResponses2 }; // Ensure person1Responses is always populated
-    const person2Responses = Object.keys(randomResponses2).length ? randomResponses2 : { ...responses }; // Ensure person2Responses is always populated
+    const person1Responses = Object.keys(responses).length ? responses : { ...randomResponses2 };
+    const person2Responses = Object.keys(randomResponses2).length ? randomResponses2 : { ...responses };
     return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses, person2Responses };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
@@ -300,7 +300,6 @@ function generateReport(code1, code2, result) {
     const question = questions.find(q => q.id === key)?.text || key;
     return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
   }).join('');
-  // Add a totals row
   traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
 
   // Side-by-side comparison for Values
@@ -311,7 +310,6 @@ function generateReport(code1, code2, result) {
     const question = questions.find(q => q.id === key)?.text || key;
     return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
   }).join('');
-  // Add a totals row
   valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
 
   const reportContent = `
@@ -451,7 +449,6 @@ function generateReport(code1, code2, result) {
       <button class="no-print fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="window.print()">Print Report</button>
       <script>
         const rgb = [${hexToRGB(themeColor).join(', ')}];
-        // Render Bar Chart
         const barChart = new Chart(document.getElementById('bar-chart'), {
           type: 'bar',
           data: {
@@ -480,7 +477,6 @@ function generateReport(code1, code2, result) {
             }
           }
         });
-        // Render Scatter Chart
         const scatterChart = new Chart(document.getElementById('scatter-chart'), {
           type: 'scatter',
           data: {
@@ -514,7 +510,6 @@ function generateReport(code1, code2, result) {
             }
           }
         });
-        // Render Lines Chart
         const linesChart = new Chart(document.getElementById('lines-chart'), {
           type: 'line',
           data: {
@@ -660,42 +655,42 @@ document.getElementById('compare-codes').addEventListener('click', () => {
         currentChart.destroy();
         currentChart = null;
       }
-      setTimeout(() => {
-        currentView = 'bar';
-        currentChart = renderBarChart(result);
-        console.log('Initial Bar Chart render triggered');
-      }, 100);
-      const barView = document.getElementById('bar-view');
-      const scatterView = document.getElementById('scatter-view');
-      const linesView = document.getElementById('lines-view');
-      const printReport = document.getElementById('print-report');
-      if (barView && scatterView && linesView && printReport) {
-        const barClone = barView.cloneNode(true);
-        const scatterClone = scatterView.cloneNode(true);
-        const linesClone = linesView.cloneNode(true);
-        const printClone = printReport.cloneNode(true);
-        barView.parentNode.replaceChild(barClone, barView);
-        scatterView.parentNode.replaceChild(scatterClone, scatterView);
-        linesView.parentNode.replaceChild(linesClone, linesView);
-        printReport.parentNode.replaceChild(printClone, printReport);
-        barClone.addEventListener('click', () => {
+      currentView = 'bar';
+      currentChart = renderBarChart(result);
+      console.log('Initial Bar Chart render triggered');
+      
+      const viewElements = {
+        'bar-view': () => {
           if (currentChart) currentChart.destroy();
           currentView = 'bar';
           currentChart = renderBarChart(result);
-        });
-        scatterClone.addEventListener('click', () => {
+        },
+        'scatter-view': () => {
           if (currentChart) currentChart.destroy();
           currentView = 'scatter';
           currentChart = renderScatterChart(result);
-        });
-        linesClone.addEventListener('click', () => {
+        },
+        'lines-view': () => {
           if (currentChart) currentChart.destroy();
           currentView = 'lines';
           currentChart = renderLinesView(result);
-        });
-        printClone.addEventListener('click', () => generateReport(code1, code2, result));
-      } else {
-        console.error('One or more view elements not found');
+        },
+        'print-report': () => generateReport(code1, code2, result)
+      };
+
+      let missingElements = [];
+      for (const [id, handler] of Object.entries(viewElements)) {
+        const element = document.getElementById(id);
+        if (element) {
+          const clone = element.cloneNode(true);
+          element.parentNode.replaceChild(clone, element);
+          clone.addEventListener('click', handler);
+        } else {
+          missingElements.push(id);
+        }
+      }
+      if (missingElements.length > 0) {
+        console.error(`Missing view elements: ${missingElements.join(', ')}`);
       }
     } catch (e) {
       errorDiv.classList.remove('hidden');
@@ -707,7 +702,7 @@ document.getElementById('compare-codes').addEventListener('click', () => {
   }
 });
 
-document.getElementById('relationship-select').addEventListener('change', (e) => {
+document.getElementById('relationship-select').addEventListener('click', (e) => {
   selectedRelationship = e.target.value;
 });
 
