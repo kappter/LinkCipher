@@ -377,21 +377,21 @@ function generateReport(code1, code2, result) {
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
 
   let traumaComparison = '';
-  traumaComparison = traumaKeys.map(key => {
+  traumaComparison = (typeof questions !== 'undefined' ? traumaKeys.map(key => {
     const score1 = result.person1Responses[key] || 3;
     const score2 = result.person2Responses[key] || 3;
     const question = questions.find(q => q.id === key)?.text || key;
     return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
-  }).join('');
+  }).join('') : traumaKeys.map(key => `<tr><td>${key}</td><td>${result.person1Responses[key] || 3}</td><td>${result.person2Responses[key] || 3}</td></tr>`).join(''));
   traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
 
   let valuesComparison = '';
-  valuesComparison = valueKeys.map(key => {
+  valuesComparison = (typeof questions !== 'undefined' ? valueKeys.map(key => {
     const score1 = result.person1Responses[key] || 3;
     const score2 = result.person2Responses[key] || 3;
     const question = questions.find(q => q.id === key)?.text || key;
     return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
-  }).join('');
+  }).join('') : valueKeys.map(key => `<tr><td>${key}</td><td>${result.person1Responses[key] || 3}</td><td>${result.person2Responses[key] || 3}</td></tr>`).join(''));
   valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
 
   const reportContent = `
