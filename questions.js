@@ -1,0 +1,20 @@
+const questions = [
+  { id: 'violence', text: 'How much has exposure to violence affected you?' },
+  { id: 'divorce', text: 'How much has divorce impacted your life?' },
+  { id: 'neglect', text: 'How much has neglect influenced your experiences?' },
+  { id: 'illness', text: 'How much has illness shaped your life?' },
+  { id: 'money', text: 'How much have financial issues affected you?' },
+  { id: 'estrangement', text: 'How much has estrangement impacted you?' },
+  { id: 'addiction', text: 'How much has addiction affected your life?' },
+  { id: 'death', text: 'How much has the loss of a loved one influenced you?' },
+  { id: 'trust', text: 'How important is trust to you?' },
+  { id: 'communication', text: 'How important is communication to you?' },
+  { id: 'conflict', text: 'How do you handle conflict?' },
+  { id: 'religion', text: 'How important is religion to you?' },
+  { id: 'politics', text: 'How important are political views to you?' },
+  { id: 'resilience', text: 'How resilient do you consider yourself?' },
+  { id: 'extroversion', text: 'How extroverted are you?' },
+  { id: 'risk', text: 'How comfortable are you with taking risks?' },
+  { id: 'empathy', text: 'How empathetic are you?' },
+  { id: 'tradition', text: 'How important are traditions to you?' }
+];
