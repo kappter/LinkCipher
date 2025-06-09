@@ -91,11 +91,13 @@ document.getElementById('random-code').addEventListener('click', () => {
     document.getElementById('code1').value = userCode;
   } else {
     randomResponses2 = { main: {}, followUps: {} };
+    const baseResponses = Object.keys(responses.main).length ? responses : { main: {}, followUps: {} };
     traumaKeys.forEach(key => {
-      const baseScore = Math.floor(Math.random() * 5) + 1;
-      const offset = Math.floor(Math.random() * 3) - 1;
-      randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset));
-      if (randomResponses2.main[key] >= 4) {
+      const baseScore = baseResponses.main[key] || Math.floor(Math.random() * 5) + 1;
+      const offset = Math.floor(Math.random() * 3) - 1; // -1 to +1
+      const newScore = Math.max(1, Math.min(5, baseScore + offset + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))); // Additional random tweak 30% of the time
+      randomResponses2.main[key] = newScore;
+      if (newScore >= 4) {
         const followUpKey = `${key}_followup`;
         randomResponses2.followUps[followUpKey] = {
           score: Math.floor(Math.random() * 5) + 1,
@@ -104,10 +106,11 @@ document.getElementById('random-code').addEventListener('click', () => {
       }
     });
     valueKeys.forEach(key => {
-      const baseScore = Math.floor(Math.random() * 5) + 1;
+      const baseScore = baseResponses.main[key] || Math.floor(Math.random() * 5) + 1;
       const offset = Math.floor(Math.random() * 3) - 1;
-      randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset));
-      if (randomResponses2.main[key] >= 4) {
+      const newScore = Math.max(1, Math.min(5, baseScore + offset + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0)));
+      randomResponses2.main[key] = newScore;
+      if (newScore >= 4) {
         const followUpKey = `${key}_followup`;
         randomResponses2.followUps[followUpKey] = {
           score: Math.floor(Math.random() * 5) + 1,
