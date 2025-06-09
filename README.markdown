@@ -1,77 +1,56 @@
-# LinkCipher
+# LinkCipher Talking Points Generator
 
-LinkCipher is a web-based compatibility analysis tool designed to help individuals explore the alignment of their experiences and values with others, such as in romantic, friendship, family, or professional relationships. Using a survey-based approach, it generates unique codes that encode Trauma and Values scores, which can then be compared to assess compatibility.
+## Overview
+LinkCipher is a web-based tool designed to generate talking points and compatibility insights for various relationship types (romantic, friendship, family, professional). It uses a survey-based approach to collect responses, generates unique codes, and compares them to provide detailed reports with visualizations.
 
 ## Features
-- **Survey System**: Answer a series of questions to generate a personalized compatibility code.
-- **Code Comparison**: Enter two codes to compare compatibility, with insights into Links, Disconnects, and Caveats.
-- **Visualizations**: View compatibility data through Bar Charts, Radar Charts, and Vertical Lines visualizations.
-- **Detailed Analysis**: Provides a breakdown of individual Trauma and Values scores (available for Person 1 if surveyed).
-- **Customizable Themes**: Adjust the theme color and toggle between light and dark modes.
-- **Printable Reports**: Generate a detailed HTML report with visualizations and discussion points.
+- **Survey System**: Answer questions about your experiences and values to generate a personal code.
+- **Random Code Generation**: Create a second code for comparison with randomized data.
+- **Compatibility Report**: Compare two codes to get insights, including links, disconnects, caveats, and detailed score comparisons.
+- **Visualizations**: Includes bar charts, scatter plots, line charts, and clustered comparisons to visualize data.
+- **Printable Reports**: Export a formatted HTML report with all analysis and charts.
 
-## Installation
+## Getting Started
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/yourusername/linkcipher.git
-   cd linkcipher
+### Prerequisites
+- A modern web browser (Chrome, Firefox, Edge).
+- Internet connection for loading external libraries (Tailwind CSS, Chart.js).
+
+### Installation
+1. Clone the repository or download the files:
    ```
+   git clone <repository-url>
+   ```
+2. Ensure all `.js` files (`index.html`, `ui.js`, `survey.js`, `code.js`, `charts.js`, `report.js`, and relationship files like `romantic.js`) are in the same directory.
+3. Open `index.html` in a web browser to start.
 
-2. **Ensure Dependencies**:
-   - The project uses Chart.js for visualizations and Tailwind CSS for styling, both loaded via CDN.
-   - No additional server setup is required; it runs as a static web application.
+### Usage
+1. **Select Relationship Type**: Choose from "Romantic," "Friendship," "Family," or "Professional" using the dropdown.
+2. **Take Survey**: Click "Start Survey," answer questions with the slider (1-5), and use "Next" or "Skip" to proceed. Optional follow-ups may appear for high scores.
+3. **Generate Codes**: After completing the survey, `code1` is generated. Click "Generate Random Code" for `code2`.
+4. **Compare Codes**: Click "Compare Codes" to see a summary, then "Print Talking Points" to download a report.
+5. **View Report**: Open the downloaded `.html` file to review the analysis and visualizations.
 
-3. **Prepare Files**:
-   - Ensure `index.html`, `script.js`, `styles.css`, `data.js`, and `logo.png` are in the root directory.
-   - Verify that `data.js` contains the survey questions array.
+## File Structure
+- `index.html`: Main HTML structure and entry point.
+- `ui.js`: Handles UI interactions and screen transitions.
+- `survey.js`: Manages survey question loading and response collection.
+- `code.js`: Generates and compares codes based on responses.
+- `charts.js`: Initializes chart visualizations.
+- `report.js`: Generates the printable report HTML.
+- `romantic.js`, `friendship.js`, `family.js`, `professional.js`: Define relationship-specific survey questions.
 
-4. **Open in Browser**:
-   - Double-click `index.html` or serve it via a local web server (e.g., using Python's `http.server`):
-     ```bash
-     python -m http.server 8000
-     ```
-   - Navigate to `http://localhost:8000` in your browser.
-
-## Usage
-
-### 1. Start the Survey
-- Click "Start Survey" on the welcome screen.
-- Answer each question with a score from 1 to 5, or skip to use the default score of 3.
-- Complete the survey to generate your unique code.
-
-### 2. Enter Codes
-- Click "Enter Codes" on the welcome screen.
-- Input your code (generated from the survey) and another person's code (manually entered or randomly generated).
-- Click "Compare" to see the results.
-
-### 3. View Results
-- Explore the compatibility summary (Links, Disconnects, Caveats) with breakdowns for Finances, Health, and Measurables.
-- Switch between Bar Chart, Radar Chart, and Vertical Lines visualizations to analyze the data.
-- Click "Print Talking Points" to download a detailed HTML report.
-
-### 4. Customize Experience
-- Select a relationship type (Romantic, Friendship, Family, Professional) to tailor the analysis.
-- Change the theme color using the color picker.
-- Toggle between light and dark modes.
-
-## Project Structure
-- `index.html`: Main HTML file with the user interface.
-- `script.js`: JavaScript logic for survey, code generation, comparison, and report generation.
-- `styles.css`: Custom CSS for additional styling (optional, as Tailwind is used).
-- `data.js`: Contains the survey questions array.
-- `logo.png`: Project logo (replace with your own if needed).
-
-## Enhancements
-- **Detailed Analysis**: The report now includes tables breaking down Person 1's Trauma and Values scores by individual question responses (if surveyed). Person 2's detailed breakdown is unavailable unless their survey data is provided.
-- **Radar Chart**: Replaced the Venn Diagram with a Radar Chart for better comparison of Trauma and Values scores between individuals.
-- **Improved Report**: The printable report now features a "Detailed Analysis of Scores" section and updated visualizations.
+## Troubleshooting
+- **Survey Not Loading**: Clear browser cache (Ctrl+Shift+Delete in Chrome) and ensure relationship files use `window.questions = [...]`.
+- **Duplicates in Report**: If random codes produce identical scores, regenerate `code2` or check `code.js` for updates.
+- **Incorrect Totals**: Verify all scores are correctly summed in the report; update `code.js` if needed.
+- **Console Errors**: Check for `SyntaxError` or `ReferenceError` and ensure files are not cached.
 
 ## Contributing
-Contributions are welcome! Please fork the repository, make your changes, and submit a pull request. Ensure your code adheres to the existing style and includes tests if applicable.
+Feel free to fork this repository, submit issues, or propose enhancements. Ensure changes align with the existing structure and test thoroughly.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+© 2025 Ken Kapptie | For educational use only | All rights reserved.
 
 ## Contact
-For questions or support, please open an issue on the GitHub repository or contact the project maintainer at [your-email@example.com](mailto:your-email@example.com).
+For support or questions, reach out via the repository or contact the maintainer.
