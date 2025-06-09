@@ -34,8 +34,12 @@ function renderQuestion() {
   const isFollowUp = question.id.includes('_followup');
   if (isFollowUp) {
     container.innerHTML = `
-      <p class="mb-4">${question.text} <span class="text-sm text-gray-500">(Optional, enter 'external', 'internal', or skip)</span></p>
-      <input type="text" id="followup-answer" class="border p-2 w-full mb-2" placeholder="external or internal">
+      <p class="mb-4">${question.text}</p>
+      <div class="flex space-x-4 mb-2">
+        <button id="external-btn" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-700">External</button>
+        <button id="internal-btn" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-700">Internal</button>
+        <button id="skip-followup" class="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-700">Skip</button>
+      </div>
       <div class="slider-container">
         <input type="range" id="answer-slider" name="answer" min="1" max="5" step="1" value="3" class="w-full">
         <div class="slider-markers">
@@ -52,6 +56,18 @@ function renderQuestion() {
         </div>
       </div>
     `;
+    document.getElementById('external-btn').addEventListener('click', () => {
+      responses.followUps[question.id] = { score: parseInt(document.getElementById('answer-slider').value), cause: 'external' };
+      proceedNext();
+    });
+    document.getElementById('internal-btn').addEventListener('click', () => {
+      responses.followUps[question.id] = { score: parseInt(document.getElementById('answer-slider').value), cause: 'internal' };
+      proceedNext();
+    });
+    document.getElementById('skip-followup').addEventListener('click', () => {
+      responses.followUps[question.id] = { score: null, cause: null };
+      proceedNext();
+    });
   } else {
     container.innerHTML = `
       <p class="mb-4">${question.text}</p>
@@ -74,6 +90,17 @@ function renderQuestion() {
   }
 }
 
+function proceedNext() {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < questions.length) {
+    renderQuestion();
+  } else {
+    userCode = generateCode(responses);
+    showScreen('code-entry-screen');
+    document.getElementById('code1').value = userCode;
+  }
+}
+
 document.getElementById('start-survey').addEventListener('click', () => {
   showScreen('survey-screen');
   currentQuestionIndex = 0;
@@ -88,25 +115,15 @@ document.getElementById('next-question').addEventListener('click', () => {
     const question = questions[currentQuestionIndex];
     const isFollowUp = question.id.includes('_followup');
     if (isFollowUp) {
-      const followupInput = document.getElementById('followup-answer');
-      const cause = followupInput ? followupInput.value.trim().toLowerCase() : null;
-      responses.followUps[question.id] = {
-        score: parseInt(answer.value),
-        cause: cause === 'external' || cause === 'internal' ? cause : null
-      };
+      console.error('Follow-up should use buttons, not next button.');
+      return;
     } else {
-      responses.main[question.id] = parseInt(answer.value);
-      if (question.followUp && answer.value >= question.followUp.condition) {
+      const score = parseInt(answer.value);
+      responses.main[question.id] = score;
+      if (score >= 4 && question.followUp) {
         questions.splice(currentQuestionIndex + 1, 0, { id: question.followUp.key, text: question.followUp.text, followUp: null });
       }
-    }
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-      renderQuestion();
-    } else {
-      userCode = generateCode(responses);
-      showScreen('code-entry-screen');
-      document.getElementById('code1').value = userCode;
+      proceedNext();
     }
   } else {
     console.error('Answer slider or questions not available.');

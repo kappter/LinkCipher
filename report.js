@@ -8,37 +8,63 @@ function generateReport(code1, code2, result) {
   
   const traumaKeys = ['violence', 'divorce', 'neglect', 'illness', 'money', 'estrangement', 'addiction', 'death'];
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
+  const severityMap = { 1: 'Minimal', 2: 'Low', 3: 'Moderate', 4: 'High', 5: 'Severe' };
 
   let traumaComparison = '';
+  const uniqueQuestions = new Set();
   traumaComparison = (typeof questions !== 'undefined' && questions.length > 0 ? traumaKeys.map(key => {
     const score1 = result.person1Responses.main[key] || 3;
     const score2 = result.person2Responses.main[key] || 3;
     const question = questions.find(q => q.id === key)?.text || key;
-    return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
-  }).join('') : traumaKeys.map(key => `<tr><td>${key}</td><td>${result.person1Responses.main[key] || 3}</td><td>${result.person2Responses.main[key] || 3}</td></tr>`).join(''));
+    if (!uniqueQuestions.has(question)) {
+      uniqueQuestions.add(question);
+      return `<tr><td>${question}</td><td>${severityMap[score1]} (${score1})</td><td>${severityMap[score2]} (${score2})</td></tr>`;
+    }
+    return '';
+  }).filter(row => row).join('') : traumaKeys.map(key => {
+    const score1 = result.person1Responses.main[key] || 3;
+    const score2 = result.person2Responses.main[key] || 3;
+    if (!uniqueQuestions.has(key)) {
+      uniqueQuestions.add(key);
+      return `<tr><td>${key}</td><td>${severityMap[score1]} (${score1})</td><td>${severityMap[score2]} (${score2})</td></tr>`;
+    }
+    return '';
+  }).filter(row => row).join(''));
   traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
 
   let valuesComparison = '';
+  uniqueQuestions.clear();
   valuesComparison = (typeof questions !== 'undefined' && questions.length > 0 ? valueKeys.map(key => {
     const score1 = result.person1Responses.main[key] || 3;
     const score2 = result.person2Responses.main[key] || 3;
     const question = questions.find(q => q.id === key)?.text || key;
-    return `<tr><td>${question}</td><td>${score1}</td><td>${score2}</td></tr>`;
-  }).join('') : valueKeys.map(key => `<tr><td>${key}</td><td>${result.person1Responses.main[key] || 3}</td><td>${result.person2Responses.main[key] || 3}</td></tr>`).join(''));
+    if (!uniqueQuestions.has(question)) {
+      uniqueQuestions.add(question);
+      return `<tr><td>${question}</td><td>${severityMap[score1]} (${score1})</td><td>${severityMap[score2]} (${score2})</td></tr>`;
+    }
+    return '';
+  }).filter(row => row).join('') : valueKeys.map(key => {
+    const score1 = result.person1Responses.main[key] || 3;
+    const score2 = result.person2Responses.main[key] || 3;
+    if (!uniqueQuestions.has(key)) {
+      uniqueQuestions.add(key);
+      return `<tr><td>${key}</td><td>${severityMap[score1]} (${score1})</td><td>${severityMap[score2]} (${score2})</td></tr>`;
+    }
+    return '';
+  }).filter(row => row).join(''));
   valuesComparison += `<tr class="font-bold"><td>Total Values Score</td><td>${result.v1}</td><td>${result.v2}</td></tr>`;
 
-  // Follow-up comparison
   let followUpComparisonTable = '';
   let externalCount1 = 0, internalCount1 = 0, externalCount2 = 0, internalCount2 = 0;
   if (Object.keys(result.followUpComparison).length > 0) {
     followUpComparisonTable = `
-      <h3 class="text-lg font-medium mt-4">Follow-Up Responses (Optional)</h3>
+      <h3 class="text-lg font-medium mt-4">Follow-Up Responses (Cause of Severity)</h3>
       <table>
         <thead>
           <tr>
             <th>Follow-Up Question</th>
-            <th>Person 1 Score / Cause</th>
-            <th>Person 2 Score / Cause</th>
+            <th>Person 1 Severity / Cause</th>
+            <th>Person 2 Severity / Cause</th>
           </tr>
         </thead>
         <tbody>
@@ -48,7 +74,7 @@ function generateReport(code1, code2, result) {
             const questionText = (typeof questions !== 'undefined' && questions.length > 0 ? questions.find(q => q.id === parentKey)?.followUp?.text || key : key);
             if (cause1 === 'external') externalCount1++; else if (cause1 === 'internal') internalCount1++;
             if (cause2 === 'external') externalCount2++; else if (cause2 === 'internal') internalCount2++;
-            return `<tr><td>${questionText}</td><td>${score1 !== null ? `${score1} / ${cause1 || 'N/A'}` : 'N/A'}</td><td>${score2 !== null ? `${score2} / ${cause2 || 'N/A'}` : 'N/A'}</td></tr>`;
+            return `<tr><td>${questionText}</td><td>${score1 !== null ? `${severityMap[score1]} / ${cause1 || 'N/A'}` : 'N/A'}</td><td>${score2 !== null ? `${severityMap[score2]} / ${cause2 || 'N/A'}` : 'N/A'}</td></tr>`;
           }).join('')}
         </tbody>
       </table>
@@ -159,8 +185,8 @@ function generateReport(code1, code2, result) {
             <thead>
               <tr>
                 <th>Question</th>
-                <th>Person 1 Score</th>
-                <th>Person 2 Score</th>
+                <th>Person 1 Severity (Score)</th>
+                <th>Person 2 Severity (Score)</th>
               </tr>
             </thead>
             <tbody>
@@ -172,8 +198,8 @@ function generateReport(code1, code2, result) {
             <thead>
               <tr>
                 <th>Question</th>
-                <th>Person 1 Score</th>
-                <th>Person 2 Score</th>
+                <th>Person 1 Severity (Score)</th>
+                <th>Person 2 Severity (Score)</th>
               </tr>
             </thead>
             <tbody>
