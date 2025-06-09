@@ -4,12 +4,21 @@ function loadQuestions(relationship) {
   const script = document.createElement('script');
   script.src = `${relationship}.js`;
   script.onload = () => {
-    if (window.questions && window.questions.length > 0) {
-      questions = [...window.questions]; // Copy to global questions
-      renderQuestion();
-    } else {
-      console.error(`No questions loaded from ${relationship}.js. Check file content.`);
-    }
+    let attempts = 0;
+    const maxAttempts = 5;
+    const checkQuestions = setInterval(() => {
+      if (window.questions && window.questions.length > 0) {
+        questions = [...window.questions]; // Copy to global questions
+        clearInterval(checkQuestions);
+        renderQuestion();
+      } else if (attempts >= maxAttempts) {
+        console.error(`No questions loaded from ${relationship}.js after ${maxAttempts} attempts. Check file content.`);
+        clearInterval(checkQuestions);
+      } else {
+        attempts++;
+        console.log(`Attempt ${attempts} to load questions from ${relationship}.js`);
+      }
+    }, 100); // Check every 100ms
   };
   script.onerror = () => console.error(`Failed to load ${relationship}.js`);
   document.body.appendChild(script);
