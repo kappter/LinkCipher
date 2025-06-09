@@ -92,34 +92,42 @@ document.getElementById('random-code').addEventListener('click', () => {
   } else {
     randomResponses2 = { main: {}, followUps: {} };
     const allKeys = [...traumaKeys, ...valueKeys];
-    traumaKeys.forEach(key => {
-      let score;
-      do {
-        score = Math.floor(Math.random() * 5) + 1;
-      } while (responses.main[key] === score && Object.keys(responses.main).length > 0);
-      randomResponses2.main[key] = score;
-      if (score >= 4) {
-        const followUpKey = `${key}_followup`;
-        randomResponses2.followUps[followUpKey] = {
-          score: Math.floor(Math.random() * 5) + 1,
-          cause: Math.random() < 0.5 ? 'external' : 'internal'
-        };
-      }
-    });
-    valueKeys.forEach(key => {
-      let score;
-      do {
-        score = Math.floor(Math.random() * 5) + 1;
-      } while (responses.main[key] === score && Object.keys(responses.main).length > 0);
-      randomResponses2.main[key] = score;
-      if (score >= 4) {
-        const followUpKey = `${key}_followup`;
-        randomResponses2.followUps[followUpKey] = {
-          score: Math.floor(Math.random() * 5) + 1,
-          cause: Math.random() < 0.5 ? 'external' : 'internal'
-        };
-      }
-    });
+    let attempts = 0;
+    const maxAttempts = 5;
+    while (attempts < maxAttempts) {
+      let isDuplicate = false;
+      traumaKeys.forEach(key => {
+        const baseScore = Math.floor(Math.random() * 4) + 1; // 1-4 range
+        const offset = Math.floor(Math.random() * 2) + 1; // +1 or +2
+        const score = Math.min(5, baseScore + offset); // Ensure 1-5
+        randomResponses2.main[key] = score;
+        if (responses.main[key] === score && Object.keys(responses.main).length > 0) isDuplicate = true;
+        if (score >= 4) {
+          const followUpKey = `${key}_followup`;
+          randomResponses2.followUps[followUpKey] = {
+            score: Math.floor(Math.random() * 5) + 1,
+            cause: Math.random() < 0.5 ? 'external' : 'internal'
+          };
+        }
+      });
+      valueKeys.forEach(key => {
+        const baseScore = Math.floor(Math.random() * 4) + 1;
+        const offset = Math.floor(Math.random() * 2) + 1;
+        const score = Math.min(5, baseScore + offset);
+        randomResponses2.main[key] = score;
+        if (responses.main[key] === score && Object.keys(responses.main).length > 0) isDuplicate = true;
+        if (score >= 4) {
+          const followUpKey = `${key}_followup`;
+          randomResponses2.followUps[followUpKey] = {
+            score: Math.floor(Math.random() * 5) + 1,
+            cause: Math.random() < 0.5 ? 'external' : 'internal'
+          };
+        }
+      });
+      if (!isDuplicate) break;
+      randomResponses2 = { main: {}, followUps: {} };
+      attempts++;
+    }
     const code2 = generateCode(randomResponses2);
     document.getElementById('code2').value = code2;
   }
