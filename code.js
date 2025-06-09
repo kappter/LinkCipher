@@ -90,29 +90,40 @@ document.getElementById('random-code').addEventListener('click', () => {
     userCode = generateCode(responses);
     document.getElementById('code1').value = userCode;
   } else {
-    randomResponses2 = { main: {}, followUps: {} };
-    traumaKeys.forEach(key => {
-      const score = Math.floor(Math.random() * 5) + 1; // Fully independent random score
-      randomResponses2.main[key] = score;
-      if (score >= 4) {
-        const followUpKey = `${key}_followup`;
-        randomResponses2.followUps[followUpKey] = {
-          score: Math.floor(Math.random() * 5) + 1,
-          cause: Math.random() < 0.5 ? 'external' : 'internal'
-        };
-      }
-    });
-    valueKeys.forEach(key => {
-      const score = Math.floor(Math.random() * 5) + 1; // Fully independent random score
-      randomResponses2.main[key] = score;
-      if (score >= 4) {
-        const followUpKey = `${key}_followup`;
-        randomResponses2.followUps[followUpKey] = {
-          score: Math.floor(Math.random() * 5) + 1,
-          cause: Math.random() < 0.5 ? 'external' : 'internal'
-        };
-      }
-    });
+    randomResponses2 = { main: {}, followUps: {} }; // Reset to ensure fresh data
+    const allKeys = [...traumaKeys, ...valueKeys];
+    let attempts = 0;
+    const maxAttempts = 10;
+    while (attempts < maxAttempts) {
+      let isDuplicate = false;
+      traumaKeys.forEach(key => {
+        const score = Math.floor(Math.random() * 5) + 1;
+        randomResponses2.main[key] = score;
+        if (responses.main[key] === score && Object.keys(responses.main).length > 0) isDuplicate = true;
+        if (score >= 4) {
+          const followUpKey = `${key}_followup`;
+          randomResponses2.followUps[followUpKey] = {
+            score: Math.floor(Math.random() * 5) + 1,
+            cause: Math.random() < 0.5 ? 'external' : 'internal'
+          };
+        }
+      });
+      valueKeys.forEach(key => {
+        const score = Math.floor(Math.random() * 5) + 1;
+        randomResponses2.main[key] = score;
+        if (responses.main[key] === score && Object.keys(responses.main).length > 0) isDuplicate = true;
+        if (score >= 4) {
+          const followUpKey = `${key}_followup`;
+          randomResponses2.followUps[followUpKey] = {
+            score: Math.floor(Math.random() * 5) + 1,
+            cause: Math.random() < 0.5 ? 'external' : 'internal'
+          };
+        }
+      });
+      if (!isDuplicate || attempts === maxAttempts - 1) break;
+      randomResponses2 = { main: {}, followUps: {} };
+      attempts++;
+    }
     const code2 = generateCode(randomResponses2);
     document.getElementById('code2').value = code2;
   }
