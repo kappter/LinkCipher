@@ -1,3 +1,5 @@
+let currentQuestionIndex = 0;
+
 function renderQuestion() {
   const question = questions[currentQuestionIndex];
   const container = document.getElementById('question-container');
@@ -46,6 +48,8 @@ function renderQuestion() {
 
 document.getElementById('start-survey').addEventListener('click', () => {
   showScreen('survey-screen');
+  currentQuestionIndex = 0; // Reset index
+  responses = { main: {}, followUps: {} }; // Initialize responses
   renderQuestion();
 });
 

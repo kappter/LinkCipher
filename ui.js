@@ -1,3 +1,12 @@
+let userCode = null;
+let responses = { main: {}, followUps: {} };
+let randomResponses2 = { main: {}, followUps: {} };
+let selectedRelationship = 'romantic';
+let themeColor = '#2E6DB4';
+let currentChart = null;
+let currentView = 'bar';
+let currentQuestionIndex = 0;
+
 function showScreen(screenId) {
   document.querySelectorAll('#main-content > div').forEach(div => div.classList.add('hidden'));
   const screen = document.getElementById(screenId);
@@ -33,11 +42,11 @@ function toggleDarkMode() {
 
 document.getElementById('enter-codes').addEventListener('click', () => {
   showScreen('code-entry-screen');
-  if (userCode) document.getElementById('code1').value = userCode;
+  const codeInput = document.getElementById('code1');
+  if (codeInput && userCode) {
+    codeInput.value = userCode;
+  }
 });
-
-let currentChart = null;
-let currentView = 'bar';
 
 document.getElementById('compare-codes').addEventListener('click', () => {
   const code1 = document.getElementById('code1').value;
