@@ -77,9 +77,26 @@ document.getElementById('random-code').addEventListener('click', () => {
     document.getElementById('code1').value = userCode;
   } else {
     randomResponses2 = { main: {}, followUps: {} };
+    // Use Person 1's responses as a base and add variability
     traumaKeys.forEach(key => {
-      const score = Math.floor(Math.random() * 5) + 1;
-      randomResponses2.main[key] = score;
-      if (score >= 4) {
+      const baseScore = responses.main[key] || Math.floor(Math.random() * 5) + 1;
+      const offset = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+      randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset)); // Ensure 1-5 range
+      if (randomResponses2.main[key] >= 4) {
         const followUpKey = `${key}_followup`;
-        randomResponses2.followUps[followUp
+        randomResponses2.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+      }
+    });
+    valueKeys.forEach(key => {
+      const baseScore = responses.main[key] || Math.floor(Math.random() * 5) + 1;
+      const offset = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+      randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset)); // Ensure 1-5 range
+      if (randomResponses2.main[key] >= 4) {
+        const followUpKey = `${key}_followup`;
+        randomResponses2.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+      }
+    });
+    const code2 = generateCode(randomResponses2);
+    document.getElementById('code2').value = code2;
+  }
+});
