@@ -1,9 +1,17 @@
-let questions = [];
+let questions = []; // Global array to store questions
 
 function loadQuestions(relationship) {
   const script = document.createElement('script');
   script.src = `${relationship}.js`;
-  script.onload = () => renderQuestion();
+  script.onload = () => {
+    // Ensure questions is updated after loading
+    if (window.questions && window.questions.length > 0) {
+      questions = window.questions; // Copy to global questions
+      renderQuestion();
+    } else {
+      console.error(`No questions loaded from ${relationship}.js`);
+    }
+  };
   script.onerror = () => console.error(`Failed to load ${relationship}.js`);
   document.body.appendChild(script);
 }

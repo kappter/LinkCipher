@@ -10,7 +10,7 @@ function generateReport(code1, code2, result) {
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
 
   let traumaComparison = '';
-  traumaComparison = (typeof questions !== 'undefined' ? traumaKeys.map(key => {
+  traumaComparison = (typeof questions !== 'undefined' && questions.length > 0 ? traumaKeys.map(key => {
     const score1 = result.person1Responses.main[key] || 3;
     const score2 = result.person2Responses.main[key] || 3;
     const question = questions.find(q => q.id === key)?.text || key;
@@ -19,7 +19,7 @@ function generateReport(code1, code2, result) {
   traumaComparison += `<tr class="font-bold"><td>Total Trauma Score</td><td>${result.t1}</td><td>${result.t2}</td></tr>`;
 
   let valuesComparison = '';
-  valuesComparison = (typeof questions !== 'undefined' ? valueKeys.map(key => {
+  valuesComparison = (typeof questions !== 'undefined' && questions.length > 0 ? valueKeys.map(key => {
     const score1 = result.person1Responses.main[key] || 3;
     const score2 = result.person2Responses.main[key] || 3;
     const question = questions.find(q => q.id === key)?.text || key;
@@ -45,7 +45,7 @@ function generateReport(code1, code2, result) {
           ${Object.keys(result.followUpComparison).map(key => {
             const { score1, cause1, score2, cause2 } = result.followUpComparison[key];
             const parentKey = key.replace('_followup', '');
-            const questionText = questions.find(q => q.id === parentKey)?.followUp?.text || key;
+            const questionText = (typeof questions !== 'undefined' && questions.length > 0 ? questions.find(q => q.id === parentKey)?.followUp?.text || key : key);
             if (cause1 === 'external') externalCount1++; else if (cause1 === 'internal') internalCount1++;
             if (cause2 === 'external') externalCount2++; else if (cause2 === 'internal') internalCount2++;
             return `<tr><td>${questionText}</td><td>${score1 !== null ? `${score1} / ${cause1 || 'N/A'}` : 'N/A'}</td><td>${score2 !== null ? `${score2} / ${cause2 || 'N/A'}` : 'N/A'}</td></tr>`;
@@ -361,4 +361,13 @@ function generateReport(code1, code2, result) {
   a.download = `LinkCipher_TalkingPoints_${formattedDateTime.replace(/[, :]/g, '_')}.html`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function hexToRGB(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [
+    parseInt(result[1], 16),
+    parseInt(result[2], 16),
+    parseInt(result[3], 16)
+  ] : [46, 109, 180]; // Default to #2E6DB4 if invalid
 }
