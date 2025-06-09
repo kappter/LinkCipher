@@ -1,6 +1,6 @@
 function generateReport(code1, code2, result) {
   const now = new Date();
-  const formattedDateTime = now.toLocaleString('en-US', { timeZone: 'America/Denver' }); // Adjusted for MDT
+  const formattedDateTime = now.toLocaleString('en-US', { timeZone: 'America/Denver' });
   const relationship = document.getElementById('relationship-select').value || selectedRelationship;
   
   const financialImpact = result.traumaDiff > 10 ? 'Potential misalignment in financial priorities due to differing life experiences.' : 'Likely alignment in financial priorities.';
