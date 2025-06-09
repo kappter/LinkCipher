@@ -1,3 +1,13 @@
+let questions = [];
+
+function loadQuestions(relationship) {
+  const script = document.createElement('script');
+  script.src = `${relationship}.js`;
+  script.onload = () => renderQuestion();
+  script.onerror = () => console.error(`Failed to load ${relationship}.js`);
+  document.body.appendChild(script);
+}
+
 function renderQuestion() {
   const question = questions[currentQuestionIndex];
   const container = document.getElementById('question-container');
@@ -46,9 +56,10 @@ function renderQuestion() {
 
 document.getElementById('start-survey').addEventListener('click', () => {
   showScreen('survey-screen');
-  currentQuestionIndex = 0; // Use global from ui.js
-  responses = { main: {}, followUps: {} }; // Use global from ui.js
-  renderQuestion();
+  currentQuestionIndex = 0;
+  responses = { main: {}, followUps: {} };
+  const relationship = document.getElementById('relationship-select').value;
+  loadQuestions(relationship);
 });
 
 document.getElementById('next-question').addEventListener('click', () => {
