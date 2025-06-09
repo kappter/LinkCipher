@@ -58,7 +58,7 @@ document.getElementById('random-code').addEventListener('click', () => {
   const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
   const targetInput = document.activeElement === document.getElementById('code1') ? 'code1' : 'code2';
   if (targetInput === 'code1') {
-    responses = { main: {}, followUps: {} }; // Initialize responses here
+    responses = { main: {}, followUps: {} };
     traumaKeys.forEach(key => {
       const score = Math.floor(Math.random() * 5) + 1;
       responses.main[key] = score;
@@ -84,9 +84,9 @@ document.getElementById('random-code').addEventListener('click', () => {
     userCode = generateCode(responses);
     document.getElementById('code1').value = userCode;
   } else {
-    randomResponses2 = { main: {}, followUps: {} }; // Initialize randomResponses2 here
+    randomResponses2 = { main: {}, followUps: {} };
     traumaKeys.forEach(key => {
-      const baseScore = responses.main[key] || Math.floor(Math.random() * 5) + 1;
+      const baseScore = Math.floor(Math.random() * 5) + 1; // Independent random base
       const offset = Math.floor(Math.random() * 3) - 1;
       randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset));
       if (randomResponses2.main[key] >= 4) {
@@ -98,7 +98,7 @@ document.getElementById('random-code').addEventListener('click', () => {
       }
     });
     valueKeys.forEach(key => {
-      const baseScore = responses.main[key] || Math.floor(Math.random() * 5) + 1;
+      const baseScore = Math.floor(Math.random() * 5) + 1; // Independent random base
       const offset = Math.floor(Math.random() * 3) - 1;
       randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset));
       if (randomResponses2.main[key] >= 4) {

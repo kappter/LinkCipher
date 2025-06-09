@@ -4,12 +4,11 @@ function loadQuestions(relationship) {
   const script = document.createElement('script');
   script.src = `${relationship}.js`;
   script.onload = () => {
-    // Check if questions were assigned globally
     if (window.questions && window.questions.length > 0) {
-      questions = [...window.questions]; // Copy to prevent mutation issues
+      questions = [...window.questions]; // Copy to global questions
       renderQuestion();
     } else {
-      console.error(`No questions loaded from ${relationship}.js`);
+      console.error(`No questions loaded from ${relationship}.js. Check file content.`);
     }
   };
   script.onerror = () => console.error(`Failed to load ${relationship}.js`);
@@ -17,6 +16,10 @@ function loadQuestions(relationship) {
 }
 
 function renderQuestion() {
+  if (!questions || questions.length === 0) {
+    console.error('No questions available to render.');
+    return;
+  }
   const question = questions[currentQuestionIndex];
   const container = document.getElementById('question-container');
   const isFollowUp = question.id.includes('_followup');
@@ -72,7 +75,7 @@ document.getElementById('start-survey').addEventListener('click', () => {
 
 document.getElementById('next-question').addEventListener('click', () => {
   const answer = document.getElementById('answer-slider');
-  if (answer) {
+  if (answer && questions.length > 0) {
     const question = questions[currentQuestionIndex];
     const isFollowUp = question.id.includes('_followup');
     if (isFollowUp) {
@@ -96,23 +99,29 @@ document.getElementById('next-question').addEventListener('click', () => {
       showScreen('code-entry-screen');
       document.getElementById('code1').value = userCode;
     }
+  } else {
+    console.error('Answer slider or questions not available.');
   }
 });
 
 document.getElementById('skip-question').addEventListener('click', () => {
-  const question = questions[currentQuestionIndex];
-  const isFollowUp = question.id.includes('_followup');
-  if (isFollowUp) {
-    responses.followUps[question.id] = { score: null, cause: null };
+  if (questions.length > 0) {
+    const question = questions[currentQuestionIndex];
+    const isFollowUp = question.id.includes('_followup');
+    if (isFollowUp) {
+      responses.followUps[question.id] = { score: null, cause: null };
+    } else {
+      responses.main[question.id] = 3;
+    }
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      renderQuestion();
+    } else {
+      userCode = generateCode(responses);
+      showScreen('code-entry-screen');
+      document.getElementById('code1').value = userCode;
+    }
   } else {
-    responses.main[question.id] = 3;
-  }
-  currentQuestionIndex++;
-  if (currentQuestionIndex < questions.length) {
-    renderQuestion();
-  } else {
-    userCode = generateCode(responses);
-    showScreen('code-entry-screen');
-    document.getElementById('code1').value = userCode;
+    console.error('No questions available to skip.');
   }
 });
