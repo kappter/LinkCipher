@@ -1,4 +1,4 @@
-let questions = [
+window.questions = [
   { id: 'family_support', text: 'How much support do you receive from family?', followUp: { condition: 4, key: 'family_support_followup', text: 'Is this due to external trauma (e.g., family events) or internal drama (e.g., personal expectations)?' } },
   { id: 'tradition_family', text: 'How important are family traditions to you?', followUp: { condition: 4, key: 'tradition_family_followup', text: 'Is this due to external trauma (e.g., cultural shifts) or internal drama (e.g., personal values)?' } },
   { id: 'conflict_family', text: 'How do you handle family conflicts?', followUp: { condition: 4, key: 'conflict_family_followup', text: 'Is this due to external trauma (e.g., past disputes) or internal drama (e.g., emotional ties)?' } },

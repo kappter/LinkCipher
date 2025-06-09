@@ -4,9 +4,9 @@ function loadQuestions(relationship) {
   const script = document.createElement('script');
   script.src = `${relationship}.js`;
   script.onload = () => {
-    // Ensure questions is updated after loading
+    // Check if questions were assigned globally
     if (window.questions && window.questions.length > 0) {
-      questions = window.questions; // Copy to global questions
+      questions = [...window.questions]; // Copy to prevent mutation issues
       renderQuestion();
     } else {
       console.error(`No questions loaded from ${relationship}.js`);

@@ -1,4 +1,4 @@
-let questions = [
+window.questions = [
   { id: 'collaboration', text: 'How well do you collaborate with colleagues?', followUp: { condition: 4, key: 'collaboration_followup', text: 'Is this due to external trauma (e.g., workplace issues) or internal drama (e.g., work style)?' } },
   { id: 'trust_professional', text: 'How much do you trust your coworkers?', followUp: { condition: 4, key: 'trust_professional_followup', text: 'Is this due to external trauma (e.g., past experiences) or internal drama (e.g., personal judgment)?' } },
   { id: 'work_life_balance', text: 'How do you balance work and personal life?', followUp: { condition: 4, key: 'work_life_balance_followup', text: 'Is this due to external trauma (e.g., job demands) or internal drama (e.g., personal priorities)?' } },

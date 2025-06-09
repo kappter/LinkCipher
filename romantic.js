@@ -1,4 +1,4 @@
-let questions = [
+window.questions = [
   { id: 'intimacy', text: 'How important is physical intimacy to you?', followUp: { condition: 4, key: 'intimacy_followup', text: 'Is this due to external trauma (e.g., past experiences) or internal drama (e.g., personal needs)?' } },
   { id: 'trust_romantic', text: 'How much do you trust your partner?', followUp: { condition: 4, key: 'trust_romantic_followup', text: 'Is this due to external trauma (e.g., betrayal) or internal drama (e.g., insecurities)?' } },
   { id: 'communication_romantic', text: 'How open are you with your partner about your feelings?', followUp: { condition: 4, key: 'communication_romantic_followup', text: 'Is this due to external trauma (e.g., past conflicts) or internal drama (e.g., emotional barriers)?' } },
