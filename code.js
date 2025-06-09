@@ -39,10 +39,12 @@ function compareCodes(code1, code2) {
     const followUpComparison = {};
     const allFollowUpKeys = [...new Set([...Object.keys(person1Responses.followUps), ...Object.keys(person2Responses.followUps)])];
     allFollowUpKeys.forEach(key => {
-      const score1 = person1Responses.followUps[key] || null;
-      const score2 = person2Responses.followUps[key] || null;
+      const score1 = person1Responses.followUps[key]?.score || null;
+      const cause1 = person1Responses.followUps[key]?.cause || null;
+      const score2 = person2Responses.followUps[key]?.score || null;
+      const cause2 = person2Responses.followUps[key]?.cause || null;
       if (score1 !== null || score2 !== null) {
-        followUpComparison[key] = { score1, score2 };
+        followUpComparison[key] = { score1, cause1, score2, cause2 };
       }
     });
     return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses, person2Responses, followUpComparison };
@@ -62,7 +64,10 @@ document.getElementById('random-code').addEventListener('click', () => {
       responses.main[key] = score;
       if (score >= 4) {
         const followUpKey = `${key}_followup`;
-        responses.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+        responses.followUps[followUpKey] = {
+          score: Math.floor(Math.random() * 5) + 1,
+          cause: Math.random() < 0.5 ? 'external' : 'internal'
+        };
       }
     });
     valueKeys.forEach(key => {
@@ -70,30 +75,38 @@ document.getElementById('random-code').addEventListener('click', () => {
       responses.main[key] = score;
       if (score >= 4) {
         const followUpKey = `${key}_followup`;
-        responses.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+        responses.followUps[followUpKey] = {
+          score: Math.floor(Math.random() * 5) + 1,
+          cause: Math.random() < 0.5 ? 'external' : 'internal'
+        };
       }
     });
     userCode = generateCode(responses);
     document.getElementById('code1').value = userCode;
   } else {
     randomResponses2 = { main: {}, followUps: {} };
-    // Use Person 1's responses as a base and add variability
     traumaKeys.forEach(key => {
       const baseScore = responses.main[key] || Math.floor(Math.random() * 5) + 1;
-      const offset = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
-      randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset)); // Ensure 1-5 range
+      const offset = Math.floor(Math.random() * 3) - 1;
+      randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset));
       if (randomResponses2.main[key] >= 4) {
         const followUpKey = `${key}_followup`;
-        randomResponses2.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+        randomResponses2.followUps[followUpKey] = {
+          score: Math.floor(Math.random() * 5) + 1,
+          cause: Math.random() < 0.5 ? 'external' : 'internal'
+        };
       }
     });
     valueKeys.forEach(key => {
       const baseScore = responses.main[key] || Math.floor(Math.random() * 5) + 1;
-      const offset = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
-      randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset)); // Ensure 1-5 range
+      const offset = Math.floor(Math.random() * 3) - 1;
+      randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset));
       if (randomResponses2.main[key] >= 4) {
         const followUpKey = `${key}_followup`;
-        randomResponses2.followUps[followUpKey] = Math.floor(Math.random() * 5) + 1;
+        randomResponses2.followUps[followUpKey] = {
+          score: Math.floor(Math.random() * 5) + 1,
+          cause: Math.random() < 0.5 ? 'external' : 'internal'
+        };
       }
     });
     const code2 = generateCode(randomResponses2);

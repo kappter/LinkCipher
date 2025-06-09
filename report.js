@@ -1,6 +1,6 @@
 function generateReport(code1, code2, result) {
   const now = new Date();
-  const formattedDateTime = now.toLocaleString();
+  const formattedDateTime = now.toLocaleString('en-US', { timeZone: 'America/Denver' }); // Adjusted for MDT
   const relationship = document.getElementById('relationship-select').value || selectedRelationship;
   
   const financialImpact = result.traumaDiff > 10 ? 'Potential misalignment in financial priorities due to differing life experiences.' : 'Likely alignment in financial priorities.';
@@ -29,6 +29,7 @@ function generateReport(code1, code2, result) {
 
   // Follow-up comparison
   let followUpComparisonTable = '';
+  let externalCount1 = 0, internalCount1 = 0, externalCount2 = 0, internalCount2 = 0;
   if (Object.keys(result.followUpComparison).length > 0) {
     followUpComparisonTable = `
       <h3 class="text-lg font-medium mt-4">Follow-Up Responses (Optional)</h3>
@@ -36,19 +37,28 @@ function generateReport(code1, code2, result) {
         <thead>
           <tr>
             <th>Follow-Up Question</th>
-            <th>Person 1 Score</th>
-            <th>Person 2 Score</th>
+            <th>Person 1 Score / Cause</th>
+            <th>Person 2 Score / Cause</th>
           </tr>
         </thead>
         <tbody>
           ${Object.keys(result.followUpComparison).map(key => {
-            const { score1, score2 } = result.followUpComparison[key];
+            const { score1, cause1, score2, cause2 } = result.followUpComparison[key];
             const parentKey = key.replace('_followup', '');
             const questionText = questions.find(q => q.id === parentKey)?.followUp?.text || key;
-            return `<tr><td>${questionText}</td><td>${score1 !== null ? score1 : 'N/A'}</td><td>${score2 !== null ? score2 : 'N/A'}</td></tr>`;
+            if (cause1 === 'external') externalCount1++; else if (cause1 === 'internal') internalCount1++;
+            if (cause2 === 'external') externalCount2++; else if (cause2 === 'internal') internalCount2++;
+            return `<tr><td>${questionText}</td><td>${score1 !== null ? `${score1} / ${cause1 || 'N/A'}` : 'N/A'}</td><td>${score2 !== null ? `${score2} / ${cause2 || 'N/A'}` : 'N/A'}</td></tr>`;
           }).join('')}
         </tbody>
       </table>
+    `;
+    const totalFollowUps1 = externalCount1 + internalCount1;
+    const totalFollowUps2 = externalCount2 + internalCount2;
+    followUpComparisonTable += `
+      <h3 class="text-lg font-medium mt-4">Cause Analysis</h3>
+      <p>Person 1: ${externalCount1} external, ${internalCount1} internal (${totalFollowUps1 > 0 ? ((externalCount1 / totalFollowUps1) * 100).toFixed(1) : 0}% external)</p>
+      <p>Person 2: ${externalCount2} external, ${internalCount2} internal (${totalFollowUps2 > 0 ? ((externalCount2 / totalFollowUps2) * 100).toFixed(1) : 0}% external)</p>
     `;
   }
 
@@ -76,7 +86,7 @@ function generateReport(code1, code2, result) {
           color: white;
           text-align: center;
           padding: 20px 0;
-          min-height: 80px; /* Increased height to accommodate date */
+          min-height: 80px;
           box-sizing: border-box;
         }
         .header::before {
@@ -209,8 +219,8 @@ function generateReport(code1, code2, result) {
           <h2 class="text-xl font-semibold mb-2">Discussion Points</h2>
           <ul class="list-disc pl-5">
             <li>Explore shared values and experiences to strengthen the relationship.</li>
-            <li>Discuss areas of difference to understand potential challenges.</li>
-            <li>Consider communication strategies to address identified caveats.</li>
+            <li>Discuss areas of difference to understand potential challenges, especially where causes (external vs. internal) differ.</li>
+            <li>Consider communication strategies to address identified caveats, particularly if external traumas require empathy.</li>
           </ul>
         </section>
       </main>
