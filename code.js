@@ -34,8 +34,14 @@ function compareCodes(code1, code2) {
     const disconnects = traumaDiff > 15 ? 'Significant differences in life experiences may require discussion.' : 'Minor differences in experiences exist.';
     const caveats = traumaDiff > 10 || valueDiff > 10 ? 'Open communication is key to bridge gaps.' : 'Few caveats; alignment is strong.';
     console.log('Decoded values:', { t1, v1, t2, v2, traumaDiff, valueDiff });
-    const person1Responses = Object.keys(responses.main).length ? responses : { ...randomResponses2 };
-    const person2Responses = Object.keys(randomResponses2.main).length ? randomResponses2 : { ...responses };
+    const person1Responses = Object.keys(responses.main).length ? { ...responses } : { ...randomResponses2 };
+    const person2Responses = Object.keys(randomResponses2.main).length ? { ...randomResponses2 } : { ...responses };
+    const traumaKeys = ['violence', 'divorce', 'neglect', 'illness', 'money', 'estrangement', 'addiction', 'death'];
+    const valueKeys = ['trust', 'communication', 'conflict', 'religion', 'politics', 'resilience', 'extroversion', 'risk', 'empathy', 'tradition'];
+    const t1Actual = traumaKeys.reduce((sum, key) => sum + (person1Responses.main[key] || 3), 0);
+    const t2Actual = traumaKeys.reduce((sum, key) => sum + (person2Responses.main[key] || 3), 0);
+    const v1Actual = valueKeys.reduce((sum, key) => sum + (person1Responses.main[key] || 3), 0);
+    const v2Actual = valueKeys.reduce((sum, key) => sum + (person2Responses.main[key] || 3), 0);
     const followUpComparison = {};
     const allFollowUpKeys = [...new Set([...Object.keys(person1Responses.followUps), ...Object.keys(person2Responses.followUps)])];
     allFollowUpKeys.forEach(key => {
@@ -47,7 +53,7 @@ function compareCodes(code1, code2) {
         followUpComparison[key] = { score1, cause1, score2, cause2 };
       }
     });
-    return { links, disconnects, caveats, traumaDiff, valueDiff, t1, t2, v1, v2, person1Responses, person2Responses, followUpComparison };
+    return { links, disconnects, caveats, traumaDiff, valueDiff, t1: t1Actual, t2: t2Actual, v1: v1Actual, v2: v2Actual, person1Responses, person2Responses, followUpComparison };
   } catch (e) {
     throw new Error('Invalid code format or decoding failed: ' + e.message);
   }
@@ -86,7 +92,7 @@ document.getElementById('random-code').addEventListener('click', () => {
   } else {
     randomResponses2 = { main: {}, followUps: {} };
     traumaKeys.forEach(key => {
-      const baseScore = Math.floor(Math.random() * 5) + 1; // Independent random base
+      const baseScore = Math.floor(Math.random() * 5) + 1;
       const offset = Math.floor(Math.random() * 3) - 1;
       randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset));
       if (randomResponses2.main[key] >= 4) {
@@ -98,7 +104,7 @@ document.getElementById('random-code').addEventListener('click', () => {
       }
     });
     valueKeys.forEach(key => {
-      const baseScore = Math.floor(Math.random() * 5) + 1; // Independent random base
+      const baseScore = Math.floor(Math.random() * 5) + 1;
       const offset = Math.floor(Math.random() * 3) - 1;
       randomResponses2.main[key] = Math.max(1, Math.min(5, baseScore + offset));
       if (randomResponses2.main[key] >= 4) {
